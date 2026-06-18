@@ -20,6 +20,7 @@ type MunicipalityMapProps = {
   focusCode: string | null;
   onSelect: (municipalityCode: string) => void;
   onUnvisit: (municipalityCode: string) => void;
+  readOnly: boolean;
 };
 
 export function MunicipalityMap({
@@ -29,11 +30,13 @@ export function MunicipalityMap({
   focusCode,
   onSelect,
   onUnvisit,
+  readOnly,
 }: MunicipalityMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const onSelectRef = useRef(onSelect);
   const onUnvisitRef = useRef(onUnvisit);
+  const readOnlyRef = useRef(readOnly);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -42,6 +45,10 @@ export function MunicipalityMap({
   useEffect(() => {
     onUnvisitRef.current = onUnvisit;
   }, [onUnvisit]);
+
+  useEffect(() => {
+    readOnlyRef.current = readOnly;
+  }, [readOnly]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) {
@@ -96,7 +103,7 @@ export function MunicipalityMap({
 
       const feature = getMunicipalityFeatureAtPoint(map, event.point);
       const municipalityCode = feature?.properties?.municipalityCode;
-      if (typeof municipalityCode === 'string') {
+      if (typeof municipalityCode === 'string' && !readOnlyRef.current) {
         onUnvisitRef.current(municipalityCode);
       }
     });

@@ -112,6 +112,11 @@ button:disabled {
   background: #edf4f5;
 }
 
+.ghostButton:disabled {
+  color: #9ba6ad;
+  background: #eef2f3;
+}
+
 .dangerButton {
   border-color: #d8a8a3;
   color: #9f2f24;
@@ -168,7 +173,7 @@ button:disabled {
 
 .fileActions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
@@ -181,6 +186,26 @@ button:disabled {
   color: #277183;
   font-size: 13px;
   line-height: 1.5;
+}
+
+.readOnlyBanner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #9ac4ce;
+  border-radius: 8px;
+  background: #edf8fa;
+  color: #1e5f6e;
+}
+
+.readOnlyBanner strong {
+  font-size: 14px;
+}
+
+.readOnlyBanner span {
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .fieldLabel {
