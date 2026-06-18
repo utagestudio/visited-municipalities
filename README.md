@@ -23,9 +23,20 @@ mise exec -- npm run build
 
 ## データ
 
-初期状態では `public/data/*.sample.*` の小さなサンプルデータを読み込みます。
+初期状態では `public/data/manifest.json` が指す生成済みの全国データを読み込みます。
 
-実データは国土数値情報 N03 をGeoJSONに変換したものを入力として、以下でアプリ用データに変換します。
+現在の生成済みデータは、国土数値情報 N03 の令和5年（2023年1月1日時点）都道府県別ZIPを元にしています。
+
+再生成する場合は、国土数値情報 N03 の都道府県別ZIPを `data/raw/` に配置してから以下を実行します。
+ファイル名は `N03-20230101_01_GML.zip` から `N03-20230101_47_GML.zip` までを想定しています。
+
+```bash
+N03_SOURCE_DATE=2023-01-01 \
+SIMPLIFY_TOLERANCE=0.01 \
+mise exec -- npm run prepare:data
+```
+
+単一のGeoJSONを入力にする場合は `N03_GEOJSON` を指定できます。
 
 ```bash
 N03_GEOJSON=./data/raw/n03.geojson \

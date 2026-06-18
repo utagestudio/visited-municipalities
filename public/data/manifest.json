@@ -1,6 +1,1 @@
-{
-  "datasetName": "sample",
-  "sourceDate": "sample",
-  "municipalities": "/data/municipalities.sample.geojson",
-  "adjacency": "/data/adjacency.sample.json"
-}
+{"datasetName":"generated-n03","sourceDate":"2023-01-01","municipalities":"/data/municipalities.generated.geojson","adjacency":"/data/adjacency.generated.json"}

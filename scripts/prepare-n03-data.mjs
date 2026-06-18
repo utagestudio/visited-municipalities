@@ -1,40 +1,24 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { iter } from 'but-unzip';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import bbox from '@turf/bbox';
 import booleanIntersects from '@turf/boolean-intersects';
-import dissolve from '@turf/dissolve';
 import simplify from '@turf/simplify';
 
 const root = process.cwd();
 const sourcePath = process.env.N03_GEOJSON;
+const zipDir = process.env.N03_ZIP_DIR ?? path.join(root, 'data', 'raw');
 const sourceDate = process.env.N03_SOURCE_DATE ?? 'manual';
 const tolerance = Number(process.env.SIMPLIFY_TOLERANCE ?? '0.01');
 const outDir = path.join(root, 'public', 'data');
 
-if (!sourcePath) {
-  console.error('Set N03_GEOJSON to a GeoJSON FeatureCollection converted from the N03 dataset.');
-  console.error('Example: N03_GEOJSON=./data/raw/n03.geojson N03_SOURCE_DATE=2023-01-01 npm run prepare:data');
-  process.exit(1);
-}
-
-const raw = JSON.parse(await readFile(sourcePath, 'utf8'));
-
-if (raw.type !== 'FeatureCollection' || !Array.isArray(raw.features)) {
-  throw new Error('N03_GEOJSON must point to a GeoJSON FeatureCollection.');
-}
-
 await mkdir(outDir, { recursive: true });
 
-const normalized = raw.features.map(normalizeN03Feature).filter(Boolean);
-const dissolved = dissolveByMunicipality(normalized);
-const simplified = simplify(dissolved, {
-  tolerance,
-  highQuality: false,
-  mutate: false,
-});
-const adjacency = buildAdjacency(simplified.features);
+const groups = await loadMunicipalityGroups();
+const processed = buildMunicipalityCollection(groups);
+const adjacency = buildAdjacency(processed.features);
 
-await writeJson(path.join(outDir, 'municipalities.generated.geojson'), simplified);
+await writeJson(path.join(outDir, 'municipalities.generated.geojson'), processed);
 await writeJson(path.join(outDir, 'adjacency.generated.json'), adjacency);
 await writeJson(path.join(outDir, 'manifest.json'), {
   datasetName: 'generated-n03',
@@ -43,24 +27,103 @@ await writeJson(path.join(outDir, 'manifest.json'), {
   adjacency: '/data/adjacency.generated.json',
 });
 
-console.log(`Wrote ${simplified.features.length} municipality features to ${outDir}`);
+console.log(`Wrote ${processed.features.length} municipality features to ${outDir}`);
 console.log(`Wrote adjacency for ${Object.keys(adjacency).length} municipality keys`);
+
+async function loadMunicipalityGroups() {
+  const groups = new Map();
+
+  if (sourcePath) {
+    const raw = JSON.parse(await readFile(sourcePath, 'utf8'));
+
+    if (raw.type !== 'FeatureCollection' || !Array.isArray(raw.features)) {
+      throw new Error('N03_GEOJSON must point to a GeoJSON FeatureCollection.');
+    }
+
+    addFeaturesToGroups(groups, raw.features);
+    return groups;
+  }
+
+  const zipNames = (await readdir(zipDir))
+    .filter((name) => /^N03-20230101_\d{2}_GML\.zip$/.test(name))
+    .sort();
+
+  if (zipNames.length !== 47) {
+    throw new Error(`Set N03_GEOJSON, or put 47 prefecture ZIP files in ${zipDir}. Found ${zipNames.length}.`);
+  }
+
+  for (const zipName of zipNames) {
+    const geojson = await readGeoJsonFromZip(path.join(zipDir, zipName));
+    addFeaturesToGroups(groups, geojson.features);
+    console.log(`${zipName}: ${geojson.features.length} raw features`);
+  }
+
+  return groups;
+}
+
+async function readGeoJsonFromZip(zipPath) {
+  const zipBytes = await readFile(zipPath);
+  const geojsonEntry = Array.from(iter(zipBytes)).find((entry) => entry.filename.endsWith('.geojson'));
+
+  if (!geojsonEntry) {
+    throw new Error(`No .geojson file found in ${zipPath}`);
+  }
+
+  const geojson = JSON.parse(new TextDecoder().decode(await geojsonEntry.read()));
+
+  if (geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+    throw new Error(`${geojsonEntry.filename} in ${zipPath} is not a GeoJSON FeatureCollection.`);
+  }
+
+  return geojson;
+}
+
+function addFeaturesToGroups(groups, features) {
+  for (const rawFeature of features) {
+    const normalized = normalizeN03Feature(rawFeature);
+
+    if (!normalized) {
+      continue;
+    }
+
+    const feature = simplify(normalized, {
+      tolerance,
+      highQuality: false,
+      mutate: false,
+    });
+    const municipalityCode = feature.properties.municipalityCode;
+    const group = groups.get(municipalityCode) ?? {
+      properties: feature.properties,
+      polygons: [],
+    };
+
+    if (feature.geometry.type === 'Polygon') {
+      group.polygons.push(feature.geometry.coordinates);
+    } else if (feature.geometry.type === 'MultiPolygon') {
+      group.polygons.push(...feature.geometry.coordinates);
+    }
+
+    groups.set(municipalityCode, group);
+  }
+}
 
 function normalizeN03Feature(feature) {
   const props = feature.properties ?? {};
-  const prefectureName = props.N03_001;
-  const cityName = props.N03_004;
-  const wardName = props.N03_005;
+  const rawPrefectureName = props.N03_001;
+  const prefectureName = normalizePrefectureName(rawPrefectureName);
+  const districtOrDesignatedCityName = props.N03_003;
+  const cityOrWardName = props.N03_004;
   const rawCode = props.N03_007;
 
-  if (!prefectureName || !cityName || !rawCode || !feature.geometry) {
+  if (!prefectureName || !cityOrWardName || !rawCode || !feature.geometry) {
     return null;
   }
 
-  const isTokyoSpecialWard = prefectureName === '東京都' && cityName === '特別区部' && wardName;
-  const isDesignatedCityWard = Boolean(wardName) && !isTokyoSpecialWard;
-  const municipalityName = isTokyoSpecialWard ? wardName : cityName;
-  const municipalityCode = isDesignatedCityWard ? toDesignatedCityCode(rawCode) : rawCode;
+  const isDesignatedCityWard = isDesignatedCity(districtOrDesignatedCityName) && !isTokyoSpecialWardCode(rawCode);
+  const municipalityName = isDesignatedCityWard ? districtOrDesignatedCityName : cityOrWardName;
+  const municipalityCode = isDesignatedCityWard
+    ? toDesignatedCityCode(prefectureName, districtOrDesignatedCityName)
+    : rawCode;
 
   return {
     type: 'Feature',
@@ -74,33 +137,47 @@ function normalizeN03Feature(feature) {
   };
 }
 
-function toDesignatedCityCode(rawCode) {
-  const code = String(rawCode);
-  if (!/^\d{5}$/.test(code)) {
-    return `designated-city:${code}`;
+function normalizePrefectureName(value) {
+  if (typeof value !== 'string') {
+    return value;
   }
 
-  return `${code.slice(0, 4)}0`;
+  if (/[都道府県]$/.test(value)) {
+    return value;
+  }
+
+  return `${value}県`;
 }
 
-function dissolveByMunicipality(features) {
-  const dissolved = dissolve(
-    {
-      type: 'FeatureCollection',
-      features,
-    },
-    {
-      propertyName: 'municipalityCode',
-    },
-  );
+function isDesignatedCity(value) {
+  return typeof value === 'string' && value.endsWith('市');
+}
 
-  const sourceProperties = new Map(features.map((feature) => [feature.properties.municipalityCode, feature.properties]));
+function isTokyoSpecialWardCode(rawCode) {
+  const code = String(rawCode);
+  return /^131\d{2}$/.test(code);
+}
 
+function toDesignatedCityCode(prefectureName, cityName) {
+  return `designated-city:${prefectureName}:${cityName}`;
+}
+
+function buildMunicipalityCollection(groups) {
   return {
     type: 'FeatureCollection',
-    features: dissolved.features.map((feature) => ({
-      ...feature,
-      properties: sourceProperties.get(feature.properties.municipalityCode) ?? feature.properties,
+    features: Array.from(groups.values()).map((group) => ({
+      type: 'Feature',
+      properties: group.properties,
+      geometry:
+        group.polygons.length === 1
+          ? {
+              type: 'Polygon',
+              coordinates: group.polygons[0],
+            }
+          : {
+              type: 'MultiPolygon',
+              coordinates: group.polygons,
+            },
     })),
   };
 }
