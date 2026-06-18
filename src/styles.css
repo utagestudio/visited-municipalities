@@ -166,6 +166,23 @@ button:disabled {
   gap: 10px;
 }
 
+.fileActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.statusText {
+  margin: 0;
+  color: #277183;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .fieldLabel {
   font-size: 13px;
   font-weight: 700;

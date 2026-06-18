@@ -1,18 +1,27 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MunicipalityMap } from './MunicipalityMap';
 import { pickColorForMunicipality } from './colors';
 import { loadMapData, type LoadedMapData } from './data';
-import { createEmptyState, loadSavedState, pruneStateToKnownMunicipalities, saveState } from './storage';
+import {
+  createEmptyState,
+  loadSavedState,
+  parseSavedState,
+  pruneStateToKnownMunicipalities,
+  saveState,
+  serializeSavedState,
+} from './storage';
 import type { MunicipalityFeature, SavedState } from './types';
 
 export function App() {
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const [mapData, setMapData] = useState<LoadedMapData | null>(null);
   const [state, setState] = useState<SavedState>(() => loadSavedState());
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [focusCode, setFocusCode] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -143,6 +152,48 @@ export function App() {
     setSelectedCode(null);
   }, []);
 
+  const exportState = useCallback(() => {
+    const blob = new Blob([serializeSavedState(state)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `visited-municipalities-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  }, [state]);
+
+  const importState = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+
+      if (!file || !mapData) {
+        return;
+      }
+
+      try {
+        const imported = parseSavedState(await file.text());
+        const knownCodes = new Set(mapData.municipalities.features.map((feature) => feature.properties.municipalityCode));
+        const pruned = pruneStateToKnownMunicipalities(imported, knownCodes);
+        const importedCount = Object.keys(pruned.municipalities).length;
+        const skippedCount = Object.keys(imported.municipalities).length - importedCount;
+
+        setState(pruned);
+        setSelectedCode(null);
+        setImportStatus(
+          skippedCount > 0
+            ? `${importedCount}件をインポートしました。対象外の${skippedCount}件は除外しました。`
+            : `${importedCount}件をインポートしました。`,
+        );
+      } catch {
+        setImportStatus('JSONを読み込めませんでした。');
+      }
+    },
+    [mapData],
+  );
+
   if (error) {
     return (
       <main className="appShell">
@@ -193,6 +244,25 @@ export function App() {
           <Stat label="全体" value={`${totalCount}`} />
           <Stat label="訪問率" value={`${visitedRate}%`} />
         </div>
+
+        <section className="panelSection">
+          <div className="fileActions">
+            <button className="ghostButton" type="button" onClick={exportState}>
+              エクスポート
+            </button>
+            <button className="ghostButton" type="button" onClick={() => importInputRef.current?.click()}>
+              インポート
+            </button>
+          </div>
+          <input
+            ref={importInputRef}
+            className="hiddenInput"
+            type="file"
+            accept="application/json,.json"
+            onChange={importState}
+          />
+          {importStatus && <p className="statusText">{importStatus}</p>}
+        </section>
 
         <section className="panelSection">
           <label className="fieldLabel" htmlFor="municipality-search">

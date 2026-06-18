@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { loadSavedState, pruneStateToKnownMunicipalities, saveState, STORAGE_KEY } from './storage';
+import {
+  loadSavedState,
+  parseSavedState,
+  pruneStateToKnownMunicipalities,
+  saveState,
+  serializeSavedState,
+  STORAGE_KEY,
+} from './storage';
 
 describe('storage', () => {
   it('returns an empty state for malformed json', () => {
@@ -49,6 +56,25 @@ describe('storage', () => {
     );
 
     expect(Object.keys(pruned.municipalities)).toEqual(['keep']);
+  });
+
+  it('serializes and parses exported state', () => {
+    const state = {
+      version: 1,
+      updatedAt: '2026-06-18T00:00:00.000Z',
+      municipalities: {
+        keep: {
+          visited: true,
+          color: '#123456',
+        },
+      },
+    } as const;
+
+    expect(parseSavedState(serializeSavedState(state)).municipalities.keep.color).toBe('#123456');
+  });
+
+  it('rejects unsupported export versions', () => {
+    expect(() => parseSavedState(JSON.stringify({ version: 2, municipalities: {} }))).toThrow();
   });
 });
 

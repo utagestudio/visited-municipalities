@@ -18,27 +18,7 @@ export function loadSavedState(storage: Storage = window.localStorage): SavedSta
   }
 
   try {
-    const parsed = JSON.parse(raw) as Partial<SavedState>;
-
-    if (parsed.version !== 1 || typeof parsed.municipalities !== 'object' || parsed.municipalities === null) {
-      return createEmptyState();
-    }
-
-    return {
-      version: 1,
-      updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : new Date().toISOString(),
-      municipalities: Object.fromEntries(
-        Object.entries(parsed.municipalities).filter(
-          ([, value]) =>
-            value &&
-            typeof value === 'object' &&
-            'visited' in value &&
-            value.visited === true &&
-            'color' in value &&
-            typeof value.color === 'string',
-        ),
-      ),
-    };
+    return parseSavedState(raw);
   } catch {
     return createEmptyState();
   }
@@ -61,4 +41,39 @@ export function pruneStateToKnownMunicipalities(state: SavedState, knownCodes: S
       Object.entries(state.municipalities).filter(([municipalityCode]) => knownCodes.has(municipalityCode)),
     ),
   };
+}
+
+export function parseSavedState(raw: string): SavedState {
+  const parsed = JSON.parse(raw) as Partial<SavedState>;
+
+  if (parsed.version !== 1 || typeof parsed.municipalities !== 'object' || parsed.municipalities === null) {
+    throw new Error('Unsupported export format.');
+  }
+
+  return {
+    version: 1,
+    updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : new Date().toISOString(),
+    municipalities: Object.fromEntries(
+      Object.entries(parsed.municipalities).filter(
+        ([, value]) =>
+          value &&
+          typeof value === 'object' &&
+          'visited' in value &&
+          value.visited === true &&
+          'color' in value &&
+          typeof value.color === 'string',
+      ),
+    ),
+  };
+}
+
+export function serializeSavedState(state: SavedState): string {
+  return `${JSON.stringify(
+    {
+      ...state,
+      updatedAt: new Date().toISOString(),
+    },
+    null,
+    2,
+  )}\n`;
 }
