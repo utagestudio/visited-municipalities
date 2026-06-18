@@ -4,6 +4,7 @@ import path from 'node:path';
 import bbox from '@turf/bbox';
 import booleanIntersects from '@turf/boolean-intersects';
 import simplify from '@turf/simplify';
+import union from '@turf/union';
 
 const root = process.cwd();
 const sourcePath = process.env.N03_GEOJSON;
@@ -86,15 +87,13 @@ function addFeaturesToGroups(groups, features) {
       continue;
     }
 
-    const feature = simplify(normalized, {
-      tolerance,
-      highQuality: false,
-      mutate: false,
-    });
+    const mergeInternalBoundaries = normalized.properties.municipalityCode.startsWith('designated-city:');
+    const feature = mergeInternalBoundaries ? normalized : simplifyFeature(normalized);
     const municipalityCode = feature.properties.municipalityCode;
     const group = groups.get(municipalityCode) ?? {
       properties: feature.properties,
       polygons: [],
+      mergeInternalBoundaries,
     };
 
     if (feature.geometry.type === 'Polygon') {
@@ -165,21 +164,64 @@ function toDesignatedCityCode(prefectureName, cityName) {
 function buildMunicipalityCollection(groups) {
   return {
     type: 'FeatureCollection',
-    features: Array.from(groups.values()).map((group) => ({
-      type: 'Feature',
-      properties: group.properties,
-      geometry:
-        group.polygons.length === 1
-          ? {
-              type: 'Polygon',
-              coordinates: group.polygons[0],
-            }
-          : {
-              type: 'MultiPolygon',
-              coordinates: group.polygons,
-            },
-    })),
+    features: Array.from(groups.values()).map(buildMunicipalityFeature),
   };
+}
+
+function buildMunicipalityFeature(group) {
+  const feature = {
+    type: 'Feature',
+    properties: group.properties,
+    geometry:
+      group.polygons.length === 1
+        ? {
+            type: 'Polygon',
+            coordinates: group.polygons[0],
+          }
+        : {
+            type: 'MultiPolygon',
+            coordinates: group.polygons,
+          },
+  };
+
+  if (!group.mergeInternalBoundaries || group.polygons.length < 2) {
+    return feature;
+  }
+
+  try {
+    const unioned = union(
+      {
+        type: 'FeatureCollection',
+        features: group.polygons.map((coordinates) => ({
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Polygon',
+            coordinates,
+          },
+        })),
+      },
+      {
+        properties: group.properties,
+      },
+    );
+
+    if (unioned) {
+      return simplifyFeature(unioned);
+    }
+  } catch (error) {
+    console.warn(`Failed to union ${group.properties.displayName}; keeping separate polygons.`, error);
+  }
+
+  return simplifyFeature(feature);
+}
+
+function simplifyFeature(feature) {
+  return simplify(feature, {
+    tolerance,
+    highQuality: false,
+    mutate: false,
+  });
 }
 
 function buildAdjacency(features) {
