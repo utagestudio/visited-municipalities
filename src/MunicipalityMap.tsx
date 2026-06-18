@@ -54,8 +54,12 @@ export function MunicipalityMap({
       center: [138.3, 37.8],
       zoom: 4.2,
       attributionControl: false,
+      dragRotate: false,
+      pitchWithRotate: false,
     });
 
+    map.dragRotate.disable();
+    map.touchZoomRotate.disableRotation();
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 
