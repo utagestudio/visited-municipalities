@@ -1,0 +1,57 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "municipalityCode": "sample:tokyo:chiyoda",
+        "prefectureName": "東京都",
+        "municipalityName": "千代田区",
+        "displayName": "東京都 千代田区"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[139.74,35.68],[139.79,35.68],[139.79,35.72],[139.74,35.72],[139.74,35.68]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "municipalityCode": "sample:tokyo:chuo",
+        "prefectureName": "東京都",
+        "municipalityName": "中央区",
+        "displayName": "東京都 中央区"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[139.79,35.68],[139.84,35.68],[139.84,35.72],[139.79,35.72],[139.79,35.68]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "municipalityCode": "sample:tokyo:minato",
+        "prefectureName": "東京都",
+        "municipalityName": "港区",
+        "displayName": "東京都 港区"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[139.74,35.64],[139.79,35.64],[139.79,35.68],[139.74,35.68],[139.74,35.64]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "municipalityCode": "sample:kanagawa:yokohama",
+        "prefectureName": "神奈川県",
+        "municipalityName": "横浜市",
+        "displayName": "神奈川県 横浜市"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[139.59,35.39],[139.67,35.39],[139.67,35.47],[139.59,35.47],[139.59,35.39]]]
+      }
+    }
+  ]
+}

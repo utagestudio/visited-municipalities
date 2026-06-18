@@ -1,0 +1,31 @@
+import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson';
+
+export type MunicipalityProperties = {
+  municipalityCode: string;
+  prefectureName: string;
+  municipalityName: string;
+  displayName: string;
+};
+
+export type MunicipalityFeature = Feature<Polygon | MultiPolygon, MunicipalityProperties>;
+export type MunicipalityCollection = FeatureCollection<Polygon | MultiPolygon, MunicipalityProperties>;
+
+export type AdjacencyMap = Record<string, string[]>;
+
+export type SavedMunicipality = {
+  visited: true;
+  color: string;
+};
+
+export type SavedState = {
+  version: 1;
+  updatedAt: string;
+  municipalities: Record<string, SavedMunicipality>;
+};
+
+export type DataManifest = {
+  datasetName: string;
+  sourceDate: string;
+  municipalities: string;
+  adjacency: string;
+};

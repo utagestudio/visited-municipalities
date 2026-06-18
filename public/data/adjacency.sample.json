@@ -1,0 +1,6 @@
+{
+  "sample:tokyo:chiyoda": ["sample:tokyo:chuo", "sample:tokyo:minato"],
+  "sample:tokyo:chuo": ["sample:tokyo:chiyoda"],
+  "sample:tokyo:minato": ["sample:tokyo:chiyoda"],
+  "sample:kanagawa:yokohama": []
+}
