@@ -1,4 +1,10 @@
-import type { ExpressionSpecification, FillLayerSpecification, LineLayerSpecification, StyleSpecification } from 'maplibre-gl';
+import type {
+  DataDrivenPropertyValueSpecification,
+  ExpressionSpecification,
+  FillLayerSpecification,
+  LineLayerSpecification,
+  StyleSpecification,
+} from 'maplibre-gl';
 import type { SavedState } from './types';
 
 export const MUNICIPALITY_SOURCE_ID = 'municipalities';
@@ -61,7 +67,11 @@ export function createSelectedBorderLayer(selectedCode: string | null): LineLaye
   };
 }
 
-export function buildFillColorExpression(state: SavedState): ExpressionSpecification {
+export function buildFillColorExpression(state: SavedState): DataDrivenPropertyValueSpecification<string> {
+  if (Object.keys(state.municipalities).length === 0) {
+    return '#ffffff';
+  }
+
   const expression: unknown[] = ['match', ['get', 'municipalityCode']];
 
   for (const [municipalityCode, municipality] of Object.entries(state.municipalities)) {
