@@ -87,21 +87,29 @@ export function App() {
     [mapData],
   );
 
-  const unvisitSelected = useCallback(() => {
-    if (!selectedCode) {
-      return;
-    }
-
+  const unvisitMunicipality = useCallback((municipalityCode: string) => {
     setState((current) => {
+      if (!current.municipalities[municipalityCode]) {
+        return current;
+      }
+
       const nextMunicipalities = { ...current.municipalities };
-      delete nextMunicipalities[selectedCode];
+      delete nextMunicipalities[municipalityCode];
 
       return {
         ...current,
         municipalities: nextMunicipalities,
       };
     });
-  }, [selectedCode]);
+  }, []);
+
+  const unvisitSelected = useCallback(() => {
+    if (!selectedCode) {
+      return;
+    }
+
+    unvisitMunicipality(selectedCode);
+  }, [selectedCode, unvisitMunicipality]);
 
   const changeSelectedColor = useCallback(
     (color: string) => {
@@ -165,6 +173,7 @@ export function App() {
           selectedCode={selectedCode}
           focusCode={focusCode}
           onSelect={selectMunicipality}
+          onUnvisit={unvisitMunicipality}
         />
       </section>
 

@@ -19,6 +19,7 @@ type MunicipalityMapProps = {
   selectedCode: string | null;
   focusCode: string | null;
   onSelect: (municipalityCode: string) => void;
+  onUnvisit: (municipalityCode: string) => void;
 };
 
 export function MunicipalityMap({
@@ -27,14 +28,20 @@ export function MunicipalityMap({
   selectedCode,
   focusCode,
   onSelect,
+  onUnvisit,
 }: MunicipalityMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const onSelectRef = useRef(onSelect);
+  const onUnvisitRef = useRef(onUnvisit);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
+
+  useEffect(() => {
+    onUnvisitRef.current = onUnvisit;
+  }, [onUnvisit]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) {
@@ -69,12 +76,24 @@ export function MunicipalityMap({
         return;
       }
 
-      const feature = map.queryRenderedFeatures(event.point, {
-        layers: [MUNICIPALITY_FILL_LAYER_ID],
-      })[0];
+      const feature = getMunicipalityFeatureAtPoint(map, event.point);
       const municipalityCode = feature?.properties?.municipalityCode;
       if (typeof municipalityCode === 'string') {
         onSelectRef.current(municipalityCode);
+      }
+    });
+
+    map.on('contextmenu', (event) => {
+      event.preventDefault();
+
+      if (!map.getLayer(MUNICIPALITY_FILL_LAYER_ID)) {
+        return;
+      }
+
+      const feature = getMunicipalityFeatureAtPoint(map, event.point);
+      const municipalityCode = feature?.properties?.municipalityCode;
+      if (typeof municipalityCode === 'string') {
+        onUnvisitRef.current(municipalityCode);
       }
     });
 
@@ -83,9 +102,7 @@ export function MunicipalityMap({
         return;
       }
 
-      const features = map.queryRenderedFeatures(event.point, {
-        layers: [MUNICIPALITY_FILL_LAYER_ID],
-      });
+      const features = map.queryRenderedFeatures(event.point, { layers: [MUNICIPALITY_FILL_LAYER_ID] });
       map.getCanvas().style.cursor = features.length > 0 ? 'pointer' : '';
     });
 
@@ -146,6 +163,10 @@ export function MunicipalityMap({
   }, [focusCode, municipalities]);
 
   return <div className="map" ref={containerRef} aria-label="市区町村マップ" />;
+}
+
+function getMunicipalityFeatureAtPoint(map: Map, point: maplibregl.PointLike) {
+  return map.queryRenderedFeatures(point, { layers: [MUNICIPALITY_FILL_LAYER_ID] })[0];
 }
 
 function fitToCollection(map: Map | null, collection: MunicipalityCollection): void {
