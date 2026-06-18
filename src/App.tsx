@@ -35,6 +35,7 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -224,6 +225,7 @@ export function App() {
 
   const shareCurrentState = useCallback(async () => {
     const url = createShareUrl(state);
+    setShareUrl(url);
 
     try {
       if (navigator.share) {
@@ -236,10 +238,13 @@ export function App() {
         return;
       }
 
-      await navigator.clipboard.writeText(url);
-      setShareStatus('共有URLをコピーしました。');
+      if (await copyText(url)) {
+        setShareStatus('共有URLをコピーしました。');
+      } else {
+        setShareStatus('共有URLを作成しました。下の欄からコピーしてください。');
+      }
     } catch {
-      setShareStatus('共有URLを作成しましたが、コピーできませんでした。');
+      setShareStatus('共有URLを作成しました。下の欄からコピーしてください。');
     }
   }, [state, totalCount, visitedCount]);
 
@@ -327,6 +332,16 @@ export function App() {
             onChange={importState}
           />
           {shareStatus && <p className="statusText">{shareStatus}</p>}
+          {shareUrl && (
+            <textarea
+              className="shareUrlField"
+              value={shareUrl}
+              readOnly
+              rows={3}
+              onFocus={(event) => event.currentTarget.select()}
+              aria-label="共有URL"
+            />
+          )}
           {importStatus && <p className="statusText">{importStatus}</p>}
         </section>
 
@@ -475,4 +490,31 @@ function hslToHex(hue: number, saturation: number, lightness: number): string {
   return `#${[red, green, blue]
     .map((channel) => Math.round((channel + match) * 255).toString(16).padStart(2, '0'))
     .join('')}`;
+}
+
+async function copyText(text: string): Promise<boolean> {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fall through to the legacy path.
+    }
+  }
+
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.setAttribute('readonly', '');
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-9999px';
+  document.body.append(textArea);
+  textArea.select();
+
+  try {
+    return document.execCommand('copy');
+  } catch {
+    return false;
+  } finally {
+    textArea.remove();
+  }
 }

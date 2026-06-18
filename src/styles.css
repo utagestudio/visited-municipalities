@@ -188,6 +188,23 @@ button:disabled {
   line-height: 1.5;
 }
 
+.shareUrlField {
+  width: 100%;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+  border: 1px solid #bac5cb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172026;
+  font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.shareUrlField:focus {
+  border-color: #277183;
+  outline: 3px solid rgb(39 113 131 / 18%);
+}
+
 .readOnlyBanner {
   display: flex;
   flex-direction: column;
