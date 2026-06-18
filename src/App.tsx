@@ -3,6 +3,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { MunicipalityMap } from './MunicipalityMap';
 import { pickColorForMunicipality } from './colors';
 import { loadMapData, type LoadedMapData } from './data';
+import { createShareUrl, isShareUrl, readSharedStateFromUrl } from './share';
 import {
   createEmptyState,
   loadSavedState,
@@ -15,13 +16,25 @@ import type { MunicipalityFeature, SavedState } from './types';
 
 export function App() {
   const importInputRef = useRef<HTMLInputElement | null>(null);
+  const [isReadOnlyShare] = useState(() => isShareUrl());
   const [mapData, setMapData] = useState<LoadedMapData | null>(null);
-  const [state, setState] = useState<SavedState>(() => loadSavedState());
+  const [state, setState] = useState<SavedState>(() => {
+    if (!isShareUrl()) {
+      return loadSavedState();
+    }
+
+    try {
+      return readSharedStateFromUrl() ?? createEmptyState();
+    } catch {
+      return createEmptyState();
+    }
+  });
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [focusCode, setFocusCode] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,8 +59,12 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    if (isReadOnlyShare) {
+      return;
+    }
+
     saveState(state);
-  }, [state]);
+  }, [isReadOnlyShare, state]);
 
   const selectedFeature = useMemo(
     () => mapData?.municipalities.features.find((feature) => feature.properties.municipalityCode === selectedCode) ?? null,
@@ -71,7 +88,7 @@ export function App() {
 
   const selectMunicipality = useCallback(
     (municipalityCode: string) => {
-      if (!mapData) {
+      if (!mapData || isReadOnlyShare) {
         return;
       }
 
@@ -93,24 +110,31 @@ export function App() {
         };
       });
     },
-    [mapData],
+    [isReadOnlyShare, mapData],
   );
 
-  const unvisitMunicipality = useCallback((municipalityCode: string) => {
-    setState((current) => {
-      if (!current.municipalities[municipalityCode]) {
-        return current;
+  const unvisitMunicipality = useCallback(
+    (municipalityCode: string) => {
+      if (isReadOnlyShare) {
+        return;
       }
 
-      const nextMunicipalities = { ...current.municipalities };
-      delete nextMunicipalities[municipalityCode];
+      setState((current) => {
+        if (!current.municipalities[municipalityCode]) {
+          return current;
+        }
 
-      return {
-        ...current,
-        municipalities: nextMunicipalities,
-      };
-    });
-  }, []);
+        const nextMunicipalities = { ...current.municipalities };
+        delete nextMunicipalities[municipalityCode];
+
+        return {
+          ...current,
+          municipalities: nextMunicipalities,
+        };
+      });
+    },
+    [isReadOnlyShare],
+  );
 
   const unvisitSelected = useCallback(() => {
     if (!selectedCode) {
@@ -122,7 +146,7 @@ export function App() {
 
   const changeSelectedColor = useCallback(
     (color: string) => {
-      if (!selectedCode) {
+      if (!selectedCode || isReadOnlyShare) {
         return;
       }
 
@@ -144,13 +168,17 @@ export function App() {
         };
       });
     },
-    [selectedCode],
+    [isReadOnlyShare, selectedCode],
   );
 
   const resetAll = useCallback(() => {
+    if (isReadOnlyShare) {
+      return;
+    }
+
     setState(createEmptyState());
     setSelectedCode(null);
-  }, []);
+  }, [isReadOnlyShare]);
 
   const exportState = useCallback(() => {
     const blob = new Blob([serializeSavedState(state)], { type: 'application/json' });
@@ -169,7 +197,7 @@ export function App() {
       const file = event.target.files?.[0];
       event.target.value = '';
 
-      if (!file || !mapData) {
+      if (!file || !mapData || isReadOnlyShare) {
         return;
       }
 
@@ -191,8 +219,29 @@ export function App() {
         setImportStatus('JSONを読み込めませんでした。');
       }
     },
-    [mapData],
+    [isReadOnlyShare, mapData],
   );
+
+  const shareCurrentState = useCallback(async () => {
+    const url = createShareUrl(state);
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: '訪問済み市区町村マップ',
+          text: `訪問済み ${visitedCount} / ${totalCount}`,
+          url,
+        });
+        setShareStatus('共有しました。');
+        return;
+      }
+
+      await navigator.clipboard.writeText(url);
+      setShareStatus('共有URLをコピーしました。');
+    } catch {
+      setShareStatus('共有URLを作成しましたが、コピーできませんでした。');
+    }
+  }, [state, totalCount, visitedCount]);
 
   if (error) {
     return (
@@ -223,8 +272,9 @@ export function App() {
           state={state}
           selectedCode={selectedCode}
           focusCode={focusCode}
-          onSelect={selectMunicipality}
-          onUnvisit={unvisitMunicipality}
+          onSelect={isReadOnlyShare ? setSelectedCode : selectMunicipality}
+          onUnvisit={isReadOnlyShare ? () => undefined : unvisitMunicipality}
+          readOnly={isReadOnlyShare}
         />
       </section>
 
@@ -234,10 +284,17 @@ export function App() {
             <p className="eyebrow">Visited municipalities</p>
             <h1>訪問済み市区町村マップ</h1>
           </div>
-          <button className="ghostButton" type="button" onClick={resetAll}>
+          <button className="ghostButton" type="button" onClick={resetAll} disabled={isReadOnlyShare}>
             リセット
           </button>
         </header>
+
+        {isReadOnlyShare && (
+          <section className="readOnlyBanner">
+            <strong>共有表示</strong>
+            <span>このURLの内容は編集・保存されません。</span>
+          </section>
+        )}
 
         <div className="statsGrid" aria-label="進捗">
           <Stat label="訪問済み" value={`${visitedCount}`} />
@@ -247,10 +304,18 @@ export function App() {
 
         <section className="panelSection">
           <div className="fileActions">
+            <button className="ghostButton" type="button" onClick={shareCurrentState}>
+              共有
+            </button>
             <button className="ghostButton" type="button" onClick={exportState}>
               エクスポート
             </button>
-            <button className="ghostButton" type="button" onClick={() => importInputRef.current?.click()}>
+            <button
+              className="ghostButton"
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              disabled={isReadOnlyShare}
+            >
               インポート
             </button>
           </div>
@@ -261,6 +326,7 @@ export function App() {
             accept="application/json,.json"
             onChange={importState}
           />
+          {shareStatus && <p className="statusText">{shareStatus}</p>}
           {importStatus && <p className="statusText">{importStatus}</p>}
         </section>
 
@@ -284,7 +350,11 @@ export function App() {
                   className="searchResult"
                   type="button"
                   onClick={() => {
-                    selectMunicipality(feature.properties.municipalityCode);
+                    if (isReadOnlyShare) {
+                      setSelectedCode(feature.properties.municipalityCode);
+                    } else {
+                      selectMunicipality(feature.properties.municipalityCode);
+                    }
                     setFocusCode(feature.properties.municipalityCode);
                   }}
                 >
@@ -300,6 +370,7 @@ export function App() {
           color={selectedCode ? state.municipalities[selectedCode]?.color : undefined}
           onColorChange={changeSelectedColor}
           onUnvisit={unvisitSelected}
+          readOnly={isReadOnlyShare}
         />
 
         <footer className="panelFooter">
@@ -325,11 +396,13 @@ function MunicipalityDetails({
   color,
   onColorChange,
   onUnvisit,
+  readOnly,
 }: {
   feature: MunicipalityFeature | null;
   color: string | undefined;
   onColorChange: (color: string) => void;
   onUnvisit: () => void;
+  readOnly: boolean;
 }) {
   if (!feature) {
     return (
@@ -357,13 +430,14 @@ function MunicipalityDetails({
             type="color"
             value={toColorInputValue(color)}
             onChange={(event) => onColorChange(event.target.value)}
+            disabled={readOnly}
           />
         </div>
       ) : (
         <p className="mutedText">未訪問</p>
       )}
 
-      <button className="dangerButton" type="button" onClick={onUnvisit} disabled={!color}>
+      <button className="dangerButton" type="button" onClick={onUnvisit} disabled={!color || readOnly}>
         訪問解除
       </button>
     </section>
