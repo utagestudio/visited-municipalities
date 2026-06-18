@@ -1,0 +1,64 @@
+import type { SavedState } from './types';
+
+export const STORAGE_KEY = 'visitedMunicipalityMap:v1';
+
+export function createEmptyState(): SavedState {
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    municipalities: {},
+  };
+}
+
+export function loadSavedState(storage: Storage = window.localStorage): SavedState {
+  const raw = storage.getItem(STORAGE_KEY);
+
+  if (!raw) {
+    return createEmptyState();
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<SavedState>;
+
+    if (parsed.version !== 1 || typeof parsed.municipalities !== 'object' || parsed.municipalities === null) {
+      return createEmptyState();
+    }
+
+    return {
+      version: 1,
+      updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : new Date().toISOString(),
+      municipalities: Object.fromEntries(
+        Object.entries(parsed.municipalities).filter(
+          ([, value]) =>
+            value &&
+            typeof value === 'object' &&
+            'visited' in value &&
+            value.visited === true &&
+            'color' in value &&
+            typeof value.color === 'string',
+        ),
+      ),
+    };
+  } catch {
+    return createEmptyState();
+  }
+}
+
+export function saveState(state: SavedState, storage: Storage = window.localStorage): void {
+  storage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      ...state,
+      updatedAt: new Date().toISOString(),
+    }),
+  );
+}
+
+export function pruneStateToKnownMunicipalities(state: SavedState, knownCodes: Set<string>): SavedState {
+  return {
+    ...state,
+    municipalities: Object.fromEntries(
+      Object.entries(state.municipalities).filter(([municipalityCode]) => knownCodes.has(municipalityCode)),
+    ),
+  };
+}

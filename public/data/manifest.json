@@ -1,0 +1,6 @@
+{
+  "datasetName": "sample",
+  "sourceDate": "sample",
+  "municipalities": "/data/municipalities.sample.geojson",
+  "adjacency": "/data/adjacency.sample.json"
+}
