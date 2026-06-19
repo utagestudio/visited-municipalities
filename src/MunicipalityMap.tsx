@@ -13,6 +13,9 @@ import {
   MUNICIPALITY_SOURCE_ID,
 } from './mapStyle';
 
+const LONG_PRESS_DELAY_MS = 650;
+const LONG_PRESS_MOVE_TOLERANCE_PX = 10;
+
 type MunicipalityMapProps = {
   municipalities: MunicipalityCollection;
   state: SavedState;
@@ -37,6 +40,9 @@ export function MunicipalityMap({
   const onSelectRef = useRef(onSelect);
   const onUnvisitRef = useRef(onUnvisit);
   const readOnlyRef = useRef(readOnly);
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressStartRef = useRef<{ x: number; y: number; municipalityCode: string } | null>(null);
+  const ignoreNextClickRef = useRef(false);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -82,7 +88,21 @@ export function MunicipalityMap({
       fitToCollection(map, municipalities);
     });
 
+    const clearLongPress = () => {
+      if (longPressTimerRef.current !== null) {
+        window.clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+
+      longPressStartRef.current = null;
+    };
+
     map.on('click', (event) => {
+      if (ignoreNextClickRef.current) {
+        ignoreNextClickRef.current = false;
+        return;
+      }
+
       if (!map.getLayer(MUNICIPALITY_FILL_LAYER_ID)) {
         return;
       }
@@ -108,6 +128,54 @@ export function MunicipalityMap({
       }
     });
 
+    map.on('touchstart', (event) => {
+      clearLongPress();
+
+      if (readOnlyRef.current || event.points.length !== 1 || !map.getLayer(MUNICIPALITY_FILL_LAYER_ID)) {
+        return;
+      }
+
+      const feature = getMunicipalityFeatureAtPoint(map, event.point);
+      const municipalityCode = feature?.properties?.municipalityCode;
+      if (typeof municipalityCode !== 'string') {
+        return;
+      }
+
+      longPressStartRef.current = {
+        x: event.point.x,
+        y: event.point.y,
+        municipalityCode,
+      };
+
+      longPressTimerRef.current = window.setTimeout(() => {
+        const longPressStart = longPressStartRef.current;
+        if (!longPressStart || readOnlyRef.current) {
+          return;
+        }
+
+        ignoreNextClickRef.current = true;
+        event.originalEvent.preventDefault();
+        onUnvisitRef.current(longPressStart.municipalityCode);
+        clearLongPress();
+      }, LONG_PRESS_DELAY_MS);
+    });
+
+    map.on('touchmove', (event) => {
+      const longPressStart = longPressStartRef.current;
+      if (!longPressStart || event.points.length !== 1) {
+        clearLongPress();
+        return;
+      }
+
+      const distance = Math.hypot(event.point.x - longPressStart.x, event.point.y - longPressStart.y);
+      if (distance > LONG_PRESS_MOVE_TOLERANCE_PX) {
+        clearLongPress();
+      }
+    });
+
+    map.on('touchend', clearLongPress);
+    map.on('touchcancel', clearLongPress);
+
     map.on('mousemove', (event) => {
       if (!map.getLayer(MUNICIPALITY_FILL_LAYER_ID)) {
         return;
@@ -120,6 +188,7 @@ export function MunicipalityMap({
     mapRef.current = map;
 
     return () => {
+      clearLongPress();
       map.remove();
       mapRef.current = null;
     };
