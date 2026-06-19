@@ -580,14 +580,14 @@ function HelpItem({ icon, title, text }: { icon: ReactNode; title: string; text:
 
 function HelpIcon({ type }: { type: 'left-click' | 'right-click' | 'palette' | 'search' | 'share' | 'save' }) {
   if (type === 'left-click' || type === 'right-click') {
-    const activeX = type === 'left-click' ? 8 : 16;
+    const activeButtonPath = type === 'left-click' ? 'M12 2.5a7 7 0 0 0-7 7v1h7Z' : 'M12 2.5a7 7 0 0 1 7 7v1h-7Z';
 
     return (
       <svg viewBox="0 0 24 24" focusable="false">
+        <path d={activeButtonPath} className="helpIconAccent" />
         <path d="M12 2.5a7 7 0 0 0-7 7v5a7 7 0 0 0 14 0v-5a7 7 0 0 0-7-7Z" />
         <path d="M12 2.5v8" />
         <path d="M5 10.5h14" />
-        <path d={`M${activeX} 5.5h4v5h-4z`} className="helpIconAccent" />
       </svg>
     );
   }
