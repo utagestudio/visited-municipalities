@@ -371,7 +371,41 @@ button:disabled {
 }
 
 .helpItem strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
+}
+
+.helpIcon {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #d7dee2;
+  border-radius: 6px;
+  background: #f8faf9;
+  color: #235467;
+}
+
+.helpIcon svg {
+  width: 17px;
+  height: 17px;
+  overflow: visible;
+}
+
+.helpIcon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.helpIcon .helpIconAccent {
+  fill: #9fd8d4;
+  stroke: #235467;
 }
 
 .helpItem span {
