@@ -324,16 +324,6 @@ export function App() {
             <p className="eyebrow">Visited municipalities</p>
             <h1>訪問済み市区町村マップ</h1>
           </div>
-          <div className="headerActions">
-            <button className="ghostButton" type="button" onClick={() => setIsHelpOpen(true)}>
-              <ButtonIcon type="help" />
-              使い方
-            </button>
-            <button className="ghostButton" type="button" onClick={resetAll} disabled={isReadOnlyShare}>
-              <ButtonIcon type="reset" />
-              リセット
-            </button>
-          </div>
         </header>
 
         {isReadOnlyShare && (
@@ -348,47 +338,6 @@ export function App() {
           <Stat label="全体" value={`${totalCount}`} />
           <Stat label="訪問率" value={`${visitedRate}%`} />
         </div>
-
-        <section className="panelSection">
-          <div className="fileActions">
-            <button className="ghostButton" type="button" onClick={shareCurrentState}>
-              <ButtonIcon type="share" />
-              共有
-            </button>
-            <button className="ghostButton" type="button" onClick={exportState}>
-              <ButtonIcon type="export" />
-              エクスポート
-            </button>
-            <button
-              className="ghostButton"
-              type="button"
-              onClick={() => importInputRef.current?.click()}
-              disabled={isReadOnlyShare}
-            >
-              <ButtonIcon type="import" />
-              インポート
-            </button>
-          </div>
-          <input
-            ref={importInputRef}
-            className="hiddenInput"
-            type="file"
-            accept="application/json,.json"
-            onChange={importState}
-          />
-          {shareStatus && <p className="statusText">{shareStatus}</p>}
-          {shareUrl && (
-            <textarea
-              className="shareUrlField"
-              value={shareUrl}
-              readOnly
-              rows={3}
-              onFocus={(event) => event.currentTarget.select()}
-              aria-label="共有URL"
-            />
-          )}
-          {importStatus && <p className="statusText">{importStatus}</p>}
-        </section>
 
         <section className="panelSection">
           <label className="fieldLabel" htmlFor="municipality-search">
@@ -432,6 +381,57 @@ export function App() {
           onUnvisit={unvisitSelected}
           readOnly={isReadOnlyShare}
         />
+
+        <section className="panelSection actionPanel" aria-label="操作">
+          <div className="fileActions">
+            <button className="ghostButton" type="button" onClick={shareCurrentState}>
+              <ButtonIcon type="share" />
+              共有
+            </button>
+            <button className="ghostButton" type="button" onClick={exportState}>
+              <ButtonIcon type="export" />
+              エクスポート
+            </button>
+            <button
+              className="ghostButton"
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              disabled={isReadOnlyShare}
+            >
+              <ButtonIcon type="import" />
+              インポート
+            </button>
+          </div>
+          <div className="utilityActions">
+            <button className="ghostButton" type="button" onClick={() => setIsHelpOpen(true)}>
+              <ButtonIcon type="help" />
+              使い方
+            </button>
+            <button className="ghostButton" type="button" onClick={resetAll} disabled={isReadOnlyShare}>
+              <ButtonIcon type="reset" />
+              リセット
+            </button>
+          </div>
+          <input
+            ref={importInputRef}
+            className="hiddenInput"
+            type="file"
+            accept="application/json,.json"
+            onChange={importState}
+          />
+          {shareStatus && <p className="statusText">{shareStatus}</p>}
+          {shareUrl && (
+            <textarea
+              className="shareUrlField"
+              value={shareUrl}
+              readOnly
+              rows={3}
+              onFocus={(event) => event.currentTarget.select()}
+              aria-label="共有URL"
+            />
+          )}
+          {importStatus && <p className="statusText">{importStatus}</p>}
+        </section>
 
         <footer className="panelFooter">
           <span>データ: {mapData.manifest.datasetName}</span>
