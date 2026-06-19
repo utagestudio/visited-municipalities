@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type ChangeEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MunicipalityMap } from './MunicipalityMap';
 import { pickColorForMunicipality } from './colors';
@@ -528,24 +528,109 @@ function HelpModal({ isReadOnlyShare, onClose }: { isReadOnlyShare: boolean; onC
         )}
 
         <div className="helpGrid">
-          <HelpItem title="記録する" text="地図上の自治体をクリックすると訪問済みになり、自動で色が付きます。" />
-          <HelpItem title="解除する" text="訪問済みの自治体を右クリックするか、詳細パネルの訪問解除を押します。" />
-          <HelpItem title="色を変える" text="訪問済み自治体を選択して、詳細パネルの色から好みの色に変更できます。" />
-          <HelpItem title="探す" text="検索欄に自治体名を入力すると候補が表示され、選ぶとその場所へ移動します。" />
-          <HelpItem title="共有する" text="共有ボタンでSNS向けのURLを作成できます。共有URLは閲覧専用です。" />
-          <HelpItem title="保存する" text="通常表示ではブラウザに自動保存されます。JSONのエクスポート・インポートも使えます。" />
+          <HelpItem
+            icon={<HelpIcon type="left-click" />}
+            title="記録する"
+            text="地図上の自治体をクリックすると訪問済みになり、自動で色が付きます。"
+          />
+          <HelpItem
+            icon={<HelpIcon type="right-click" />}
+            title="解除する"
+            text="訪問済みの自治体を右クリックするか、詳細パネルの訪問解除を押します。"
+          />
+          <HelpItem
+            icon={<HelpIcon type="palette" />}
+            title="色を変える"
+            text="訪問済み自治体を選択して、詳細パネルの色から好みの色に変更できます。"
+          />
+          <HelpItem
+            icon={<HelpIcon type="search" />}
+            title="探す"
+            text="検索欄に自治体名を入力すると候補が表示され、選ぶとその場所へ移動します。"
+          />
+          <HelpItem
+            icon={<HelpIcon type="share" />}
+            title="共有する"
+            text="共有ボタンでSNS向けのURLを作成できます。共有URLは閲覧専用です。"
+          />
+          <HelpItem
+            icon={<HelpIcon type="save" />}
+            title="保存する"
+            text="通常表示ではブラウザに自動保存されます。JSONのエクスポート・インポートも使えます。"
+          />
         </div>
       </section>
     </div>
   );
 }
 
-function HelpItem({ title, text }: { title: string; text: string }) {
+function HelpItem({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
     <div className="helpItem">
-      <strong>{title}</strong>
+      <strong>
+        <span className="helpIcon" aria-hidden="true">
+          {icon}
+        </span>
+        {title}
+      </strong>
       <span>{text}</span>
     </div>
+  );
+}
+
+function HelpIcon({ type }: { type: 'left-click' | 'right-click' | 'palette' | 'search' | 'share' | 'save' }) {
+  if (type === 'left-click' || type === 'right-click') {
+    const activeX = type === 'left-click' ? 8 : 16;
+
+    return (
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M12 2.5a7 7 0 0 0-7 7v5a7 7 0 0 0 14 0v-5a7 7 0 0 0-7-7Z" />
+        <path d="M12 2.5v8" />
+        <path d="M5 10.5h14" />
+        <path d={`M${activeX} 5.5h4v5h-4z`} className="helpIconAccent" />
+      </svg>
+    );
+  }
+
+  if (type === 'palette') {
+    return (
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M12 3a9 9 0 0 0 0 18h1.2a2.2 2.2 0 0 0 1.2-4h-.9a1.7 1.7 0 0 1 0-3.4H16a5 5 0 0 0 0-10A9.6 9.6 0 0 0 12 3Z" />
+        <path d="M7.5 11.4h.1" />
+        <path d="M9.4 7.8h.1" />
+        <path d="M14 7.6h.1" />
+      </svg>
+    );
+  }
+
+  if (type === 'search') {
+    return (
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M10.8 5a5.8 5.8 0 1 0 0 11.6 5.8 5.8 0 0 0 0-11.6Z" />
+        <path d="m15.2 15.2 4.1 4.1" />
+      </svg>
+    );
+  }
+
+  if (type === 'share') {
+    return (
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M8.2 13.2 15.8 17" />
+        <path d="M15.8 7 8.2 10.8" />
+        <path d="M6 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+        <path d="M18 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+        <path d="M18 20.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path d="M6 3.5h10.4L19 6.1v14.4H6Z" />
+      <path d="M8.5 3.5v6h7v-6" />
+      <path d="M8.5 15.2h7" />
+      <path d="M8.5 18h5" />
+    </svg>
   );
 }
 
