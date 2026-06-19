@@ -536,7 +536,7 @@ function HelpModal({ isReadOnlyShare, onClose }: { isReadOnlyShare: boolean; onC
           <HelpItem
             icon={<HelpIcon type="right-click" />}
             title="解除する"
-            text="訪問済みの自治体を右クリックするか、詳細パネルの訪問解除を押します。"
+            text="訪問済みの自治体を右クリック、スマホでは長押しします。詳細パネルの訪問解除も使えます。"
           />
           <HelpItem
             icon={<HelpIcon type="palette" />}
