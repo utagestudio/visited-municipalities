@@ -14,6 +14,8 @@ import {
 } from './storage';
 import type { MunicipalityFeature, SavedState } from './types';
 
+const HELP_SEEN_KEY = 'visitedMunicipalityMap:helpSeen';
+
 export function App() {
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [isReadOnlyShare] = useState(() => isShareUrl());
@@ -36,6 +38,13 @@ export function App() {
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState(() => {
+    if (isShareUrl()) {
+      return true;
+    }
+
+    return window.localStorage.getItem(HELP_SEEN_KEY) !== '1';
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -181,6 +190,32 @@ export function App() {
     setSelectedCode(null);
   }, [isReadOnlyShare]);
 
+  const closeHelp = useCallback(() => {
+    setIsHelpOpen(false);
+
+    if (!isReadOnlyShare) {
+      window.localStorage.setItem(HELP_SEEN_KEY, '1');
+    }
+  }, [isReadOnlyShare]);
+
+  useEffect(() => {
+    if (!isHelpOpen) {
+      return;
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        closeHelp();
+      }
+    }
+
+    window.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [closeHelp, isHelpOpen]);
+
   const exportState = useCallback(() => {
     const blob = new Blob([serializeSavedState(state)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -289,9 +324,14 @@ export function App() {
             <p className="eyebrow">Visited municipalities</p>
             <h1>訪問済み市区町村マップ</h1>
           </div>
-          <button className="ghostButton" type="button" onClick={resetAll} disabled={isReadOnlyShare}>
-            リセット
-          </button>
+          <div className="headerActions">
+            <button className="ghostButton" type="button" onClick={() => setIsHelpOpen(true)}>
+              使い方
+            </button>
+            <button className="ghostButton" type="button" onClick={resetAll} disabled={isReadOnlyShare}>
+              リセット
+            </button>
+          </div>
         </header>
 
         {isReadOnlyShare && (
@@ -393,6 +433,8 @@ export function App() {
           <span>基準日: {mapData.manifest.sourceDate}</span>
         </footer>
       </aside>
+
+      {isHelpOpen && <HelpModal isReadOnlyShare={isReadOnlyShare} onClose={closeHelp} />}
     </main>
   );
 }
@@ -456,6 +498,54 @@ function MunicipalityDetails({
         訪問解除
       </button>
     </section>
+  );
+}
+
+function HelpModal({ isReadOnlyShare, onClose }: { isReadOnlyShare: boolean; onClose: () => void }) {
+  return (
+    <div className="modalOverlay" role="presentation" onMouseDown={onClose}>
+      <section
+        className="helpModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="help-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="modalHeader">
+          <div>
+            <p className="eyebrow">How to use</p>
+            <h2 id="help-title">使い方</h2>
+          </div>
+          <button className="ghostButton" type="button" onClick={onClose}>
+            閉じる
+          </button>
+        </header>
+
+        {isReadOnlyShare ? (
+          <p className="helpLead">共有URLを開いているため、この表示では編集や保存は行われません。</p>
+        ) : (
+          <p className="helpLead">訪問した市区町村をクリックして、自分用の訪問済みマップを作れます。</p>
+        )}
+
+        <div className="helpGrid">
+          <HelpItem title="記録する" text="地図上の自治体をクリックすると訪問済みになり、自動で色が付きます。" />
+          <HelpItem title="解除する" text="訪問済みの自治体を右クリックするか、詳細パネルの訪問解除を押します。" />
+          <HelpItem title="色を変える" text="訪問済み自治体を選択して、詳細パネルの色から好みの色に変更できます。" />
+          <HelpItem title="探す" text="検索欄に自治体名を入力すると候補が表示され、選ぶとその場所へ移動します。" />
+          <HelpItem title="共有する" text="共有ボタンでSNS向けのURLを作成できます。共有URLは閲覧専用です。" />
+          <HelpItem title="保存する" text="通常表示ではブラウザに自動保存されます。JSONのエクスポート・インポートも使えます。" />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function HelpItem({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="helpItem">
+      <strong>{title}</strong>
+      <span>{text}</span>
+    </div>
   );
 }
 
