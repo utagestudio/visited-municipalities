@@ -1,0 +1,19 @@
+{
+  "name": "訪問済み市区町村マップ",
+  "short_name": "市区町村マップ",
+  "description": "訪問した日本の市区町村を地図上で記録・色分けできるWebツールです。",
+  "lang": "ja-JP",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#eef2f3",
+  "theme_color": "#277183",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
