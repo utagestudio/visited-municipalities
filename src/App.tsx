@@ -326,9 +326,11 @@ export function App() {
           </div>
           <div className="headerActions">
             <button className="ghostButton" type="button" onClick={() => setIsHelpOpen(true)}>
+              <ButtonIcon type="help" />
               使い方
             </button>
             <button className="ghostButton" type="button" onClick={resetAll} disabled={isReadOnlyShare}>
+              <ButtonIcon type="reset" />
               リセット
             </button>
           </div>
@@ -350,9 +352,11 @@ export function App() {
         <section className="panelSection">
           <div className="fileActions">
             <button className="ghostButton" type="button" onClick={shareCurrentState}>
+              <ButtonIcon type="share" />
               共有
             </button>
             <button className="ghostButton" type="button" onClick={exportState}>
+              <ButtonIcon type="export" />
               エクスポート
             </button>
             <button
@@ -361,6 +365,7 @@ export function App() {
               onClick={() => importInputRef.current?.click()}
               disabled={isReadOnlyShare}
             >
+              <ButtonIcon type="import" />
               インポート
             </button>
           </div>
@@ -495,9 +500,93 @@ function MunicipalityDetails({
       )}
 
       <button className="dangerButton" type="button" onClick={onUnvisit} disabled={!color || readOnly}>
+        <ButtonIcon type="trash" />
         訪問解除
       </button>
     </section>
+  );
+}
+
+function ButtonIcon({ type }: { type: 'help' | 'reset' | 'share' | 'export' | 'import' | 'close' | 'trash' }) {
+  if (type === 'help') {
+    return (
+      <span className="buttonIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
+          <path d="M9.8 9a2.3 2.3 0 0 1 4.4 1c0 1.7-2.2 1.9-2.2 3.4" />
+          <path d="M12 17h.1" />
+        </svg>
+      </span>
+    );
+  }
+
+  if (type === 'reset') {
+    return (
+      <span className="buttonIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M5 8v5h5" />
+          <path d="M6.8 15.4a6.5 6.5 0 1 0 1-8.4L5 9.7" />
+        </svg>
+      </span>
+    );
+  }
+
+  if (type === 'share') {
+    return (
+      <span className="buttonIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M8.2 13.2 15.8 17" />
+          <path d="M15.8 7 8.2 10.8" />
+          <path d="M6 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+          <path d="M18 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+          <path d="M18 20.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+        </svg>
+      </span>
+    );
+  }
+
+  if (type === 'export' || type === 'import') {
+    return (
+      <span className="buttonIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M5 15.5v3h14v-3" />
+          {type === 'export' ? (
+            <>
+              <path d="M12 15V5" />
+              <path d="m8.5 8.5 3.5-3.5 3.5 3.5" />
+            </>
+          ) : (
+            <>
+              <path d="M12 5v10" />
+              <path d="m8.5 11.5 3.5 3.5 3.5-3.5" />
+            </>
+          )}
+        </svg>
+      </span>
+    );
+  }
+
+  if (type === 'close') {
+    return (
+      <span className="buttonIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="m7 7 10 10" />
+          <path d="m17 7-10 10" />
+        </svg>
+      </span>
+    );
+  }
+
+  return (
+    <span className="buttonIcon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M6.5 7h11" />
+        <path d="M10 7V5h4v2" />
+        <path d="M8 7.5 8.7 19h6.6L16 7.5" />
+        <path d="M11 11v4" />
+        <path d="M13 11v4" />
+      </svg>
+    </span>
   );
 }
 
@@ -517,6 +606,7 @@ function HelpModal({ isReadOnlyShare, onClose }: { isReadOnlyShare: boolean; onC
             <h2 id="help-title">使い方</h2>
           </div>
           <button className="ghostButton" type="button" onClick={onClose}>
+            <ButtonIcon type="close" />
             閉じる
           </button>
         </header>

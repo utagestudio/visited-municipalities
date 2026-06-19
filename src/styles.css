@@ -109,8 +109,35 @@ button:disabled {
 
 .ghostButton,
 .dangerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   min-height: 36px;
   padding: 0 12px;
+}
+
+.buttonIcon {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+}
+
+.buttonIcon svg {
+  width: 16px;
+  height: 16px;
+  overflow: visible;
+}
+
+.buttonIcon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
 }
 
 .ghostButton:hover,
@@ -181,6 +208,15 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+}
+
+.fileActions .ghostButton {
+  flex-direction: column;
+  gap: 4px;
+  min-height: 54px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.1;
 }
 
 .hiddenInput {
