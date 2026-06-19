@@ -67,12 +67,6 @@ button:disabled {
   gap: 12px;
 }
 
-.headerActions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .panelHeader h1,
 .detailPanel h2,
 .emptyState h1 {
@@ -210,6 +204,12 @@ button:disabled {
   gap: 8px;
 }
 
+.actionPanel {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #d7dee2;
+}
+
 .fileActions .ghostButton {
   flex-direction: column;
   gap: 4px;
@@ -217,6 +217,12 @@ button:disabled {
   padding: 6px 8px;
   font-size: 12px;
   line-height: 1.1;
+}
+
+.utilityActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .hiddenInput {
@@ -334,7 +340,6 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: auto;
   color: #66757f;
   font-size: 12px;
 }
