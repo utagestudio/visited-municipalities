@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="訪問済み市区町村マップ">
+  <rect width="64" height="64" rx="12" fill="#eef2f3"/>
+  <path d="M19 10h26l8 13-5 29H16l-5-29 8-13Z" fill="#fff" stroke="#172026" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M19 10 28 52M45 10 36 52M11 23h42M14 38h36" fill="none" stroke="#7d8a92" stroke-width="2"/>
+  <path d="M28 23h12v15H25l3-15Z" fill="#2f9d8f"/>
+  <path d="M40 23h13l-3 15H40V23Z" fill="#d95c45"/>
+  <path d="M16 38h9l3 14H16l-2-14Z" fill="#e0b43f"/>
+</svg>

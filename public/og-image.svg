@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="訪問済み市区町村マップ">
+  <rect width="1200" height="630" fill="#eef2f3"/>
+  <rect x="56" y="56" width="1088" height="518" rx="24" fill="#f8faf9" stroke="#c8d0d5" stroke-width="2"/>
+  <g transform="translate(738 95)">
+    <path d="M87 0h214l66 106-41 236H60L19 106 87 0Z" fill="#fff" stroke="#172026" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M87 0 161 342M301 0 227 342M19 106h348M45 228h295" fill="none" stroke="#7d8a92" stroke-width="6"/>
+    <path d="M161 106h98v122H136l25-122Z" fill="#2f9d8f"/>
+    <path d="M259 106h108l-27 122h-81V106Z" fill="#d95c45"/>
+    <path d="M60 228h76l25 114H60L45 228Z" fill="#e0b43f"/>
+    <path d="M161 228h66v114h-66V228Z" fill="#5f7fc6"/>
+    <path d="M227 228h113l-14 114h-99V228Z" fill="#a565b4"/>
+  </g>
+  <text x="92" y="194" fill="#172026" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="62" font-weight="800">訪問済み市区町村マップ</text>
+  <text x="94" y="270" fill="#51606a" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="32" font-weight="600">日本全国の市区町村をクリックして訪問記録を色分け</text>
+  <text x="94" y="334" fill="#51606a" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="28">ローカル保存・JSON入出力・共有URLに対応</text>
+  <rect x="94" y="430" width="354" height="58" rx="10" fill="#277183"/>
+  <text x="122" y="468" fill="#fff" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="24" font-weight="700">visited-municipalities.utage.games</text>
+</svg>
