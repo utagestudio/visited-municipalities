@@ -93,6 +93,7 @@ button:disabled {
 
 .ghostButton,
 .dangerButton,
+.primaryButton,
 .searchResult {
   border: 1px solid #bac5cb;
   border-radius: 8px;
@@ -101,7 +102,8 @@ button:disabled {
 }
 
 .ghostButton,
-.dangerButton {
+.dangerButton,
+.primaryButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -156,6 +158,17 @@ button:disabled {
   color: #9ba6ad;
   border-color: #d8dee2;
   background: #eef2f3;
+}
+
+.primaryButton {
+  border-color: #1f7184;
+  background: #277183;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.primaryButton:hover {
+  background: #1f5f70;
 }
 
 .statsGrid {
