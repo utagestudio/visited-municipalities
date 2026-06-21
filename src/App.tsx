@@ -40,7 +40,7 @@ export function App() {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(() => {
     if (isShareUrl()) {
-      return true;
+      return false;
     }
 
     return window.localStorage.getItem(HELP_SEEN_KEY) !== '1';
