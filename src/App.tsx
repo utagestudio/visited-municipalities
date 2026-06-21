@@ -190,6 +190,11 @@ export function App() {
     setSelectedCode(null);
   }, [isReadOnlyShare]);
 
+  const startOwnMap = useCallback(() => {
+    saveState(createEmptyState());
+    window.location.assign(`${window.location.origin}${window.location.pathname}`);
+  }, []);
+
   const closeHelp = useCallback(() => {
     setIsHelpOpen(false);
 
@@ -407,10 +412,17 @@ export function App() {
               <ButtonIcon type="help" />
               使い方
             </button>
-            <button className="ghostButton" type="button" onClick={resetAll} disabled={isReadOnlyShare}>
-              <ButtonIcon type="reset" />
-              リセット
-            </button>
+            {isReadOnlyShare ? (
+              <button className="primaryButton" type="button" onClick={startOwnMap}>
+                <ButtonIcon type="create" />
+                自分も作ってみる！
+              </button>
+            ) : (
+              <button className="ghostButton" type="button" onClick={resetAll}>
+                <ButtonIcon type="reset" />
+                リセット
+              </button>
+            )}
           </div>
           <input
             ref={importInputRef}
@@ -507,7 +519,7 @@ function MunicipalityDetails({
   );
 }
 
-function ButtonIcon({ type }: { type: 'help' | 'reset' | 'share' | 'export' | 'import' | 'close' | 'trash' }) {
+function ButtonIcon({ type }: { type: 'help' | 'reset' | 'share' | 'export' | 'import' | 'close' | 'trash' | 'create' }) {
   if (type === 'help') {
     return (
       <span className="buttonIcon" aria-hidden="true">
@@ -572,6 +584,17 @@ function ButtonIcon({ type }: { type: 'help' | 'reset' | 'share' | 'export' | 'i
         <svg viewBox="0 0 24 24" focusable="false">
           <path d="m7 7 10 10" />
           <path d="m17 7-10 10" />
+        </svg>
+      </span>
+    );
+  }
+
+  if (type === 'create') {
+    return (
+      <span className="buttonIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M12 3.5 13.5 8l4.6.4-3.5 3 1.1 4.5-3.7-2.4-3.7 2.4 1.1-4.5-3.5-3 4.6-.4Z" />
+          <path d="M5 18.5h14" />
         </svg>
       </span>
     );
