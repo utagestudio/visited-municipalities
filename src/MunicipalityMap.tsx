@@ -81,6 +81,8 @@ export function MunicipalityMap({
         type: 'geojson',
         data: municipalities,
         promoteId: 'municipalityCode',
+        tolerance: 0,
+        buffer: 256,
       });
       map.addLayer(createFillLayer(state));
       map.addLayer(createBorderLayer());

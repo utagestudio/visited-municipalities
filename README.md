@@ -32,7 +32,6 @@ mise exec -- npm run build
 
 ```bash
 N03_SOURCE_DATE=2023-01-01 \
-SIMPLIFY_TOLERANCE=0.01 \
 mise exec -- npm run prepare:data
 ```
 
@@ -41,7 +40,6 @@ mise exec -- npm run prepare:data
 ```bash
 N03_GEOJSON=./data/raw/n03.geojson \
 N03_SOURCE_DATE=2023-01-01 \
-SIMPLIFY_TOLERANCE=0.01 \
 mise exec -- npm run prepare:data
 ```
 
@@ -55,8 +53,18 @@ mise exec -- npm run prepare:data
 
 - 東京都23区は区単位で維持
 - 政令指定都市の区は市単位キーへ集約
-- 境界形状の簡略化
-- 隣接リストの事前生成
+- 自治体形状を一辺3000mの正三角形セルへ再構成
+- 所属未定地や所属自治体が不明な埋立地を除外
+- セル中心の近さから色回避用の近接グラフを事前生成
+
+三角形セルの粒度は必要に応じて調整できます。
+
+```bash
+TRIANGLE_CELL_SIZE_METERS=3000 \
+TRIANGLE_COVERAGE_THRESHOLD=0.5 \
+N03_SOURCE_DATE=2023-01-01 \
+mise exec -- npm run prepare:data
+```
 
 ## テスト
 

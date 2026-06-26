@@ -15,7 +15,7 @@ The expected deployment target is Cloudflare Pages.
 - Treat Tokyo's 23 special wards as individual units, but aggregate designated city wards into their parent city.
 - Toggle a municipality to visited when clicked.
 - Automatically assign a fill color when a municipality is marked visited.
-- Choose automatic colors so adjacent visited municipalities are visually distinct, especially by hue.
+- Choose automatic colors so nearby visited municipalities are visually distinct, especially by hue.
 - Allow the user to manually adjust the color of each visited municipality later.
 - Store visited municipality state and color in `localStorage`.
 - Restore saved state when the page is reopened.
@@ -39,8 +39,10 @@ The expected deployment target is Cloudflare Pages.
 - Source page: https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_1.html
 - As of 2026-06-18, the latest data listed on that page should be treated as the January 1, 2023 administrative area data.
 - Do not ship the original large source dataset to production.
-- Preprocess the data before build into lightweight GeoJSON or TopoJSON suitable for browser delivery.
-- Simplify municipality boundary geometry during preprocessing. Shape accuracy can be reduced as needed for responsive browser rendering.
+- Preprocess the data before build into lightweight GeoJSON suitable for browser delivery.
+- Reconstruct municipality geometry as a fixed-size equilateral triangle grid during preprocessing. This intentionally favors clean, matching boundaries and pleasant fill behavior over precise administrative shapes.
+- Use a 3000 meter triangle side length and 50% land coverage threshold by default.
+- Exclude unassigned or owner-unclear reclaimed lands, such as `所属未定地`, `荒川河口部`, `中央防波堤外側廃棄物処理場`, `名古屋港口埋立地`, and `境界部地先の埋立地`.
 - Aggregate designated city wards into city-level features. Tokyo's 23 special wards must remain ward-level features.
 - Keep only the attributes needed by the app:
   - `municipalityCode`
@@ -51,7 +53,7 @@ The expected deployment target is Cloudflare Pages.
 - For aggregated designated cities, use a deterministic app-level municipality key rather than ward-level `N03_007` codes.
 - Remove unnecessary attributes and split files if needed so nationwide loading remains practical.
 - Prefer a Cloudflare-friendly static data layout:
-  - simplified TopoJSON or GeoJSON assets;
+  - generated triangle-grid GeoJSON assets;
   - compressed static delivery;
   - lazy loading by prefecture or region if a nationwide single file is too large.
 
@@ -65,11 +67,11 @@ The expected deployment target is Cloudflare Pages.
 
 ## Adjacency Data
 
-- Do not calculate municipality adjacency in the browser at runtime.
-- Generate an adjacency list during preprocessing from the simplified or source municipality geometry.
-- Store adjacency as a static JSON asset keyed by the same municipality keys used in saved state.
-- The browser should only look up adjacent municipality keys from the precomputed adjacency list when choosing colors.
-- Adjacency for aggregated designated cities must be calculated after aggregation so city-level units behave correctly.
+- Do not calculate municipality proximity for color selection in the browser at runtime.
+- Generate a color-conflict proximity graph during preprocessing from nearby triangle cells.
+- Store the proximity graph as a static JSON asset keyed by the same municipality keys used in saved state.
+- The browser should only look up nearby municipality keys from the precomputed graph when choosing colors.
+- Proximity for aggregated designated cities must be calculated after aggregation so city-level units behave correctly.
 
 ## Persistence Contract
 
@@ -104,8 +106,8 @@ When restoring state:
 ## Color Selection
 
 - Generate automatic colors in HSL space.
-- Prefer colors whose hue differs sufficiently from adjacent visited municipalities.
-- Use the precomputed adjacency list to compare against already visited adjacent municipalities.
+- Prefer colors whose hue differs sufficiently from nearby visited municipalities.
+- Use the precomputed proximity graph to compare against already visited nearby municipalities.
 - If hue-only choices are insufficient, vary saturation and lightness while keeping colors readable.
 - Manual color changes override automatic color selection for that municipality.
 
@@ -132,8 +134,8 @@ Implement tests for:
 - Reloading restores visited municipalities and colors.
 - Unmarking a municipality removes it from saved state.
 - Manual color changes update saved state.
-- Automatic colors avoid close hues among adjacent visited municipalities.
-- The precomputed adjacency list is used for color selection instead of runtime polygon intersection.
+- Automatic colors avoid close hues among nearby visited municipalities.
+- The precomputed proximity graph is used for color selection instead of runtime polygon intersection.
 - Search zooms to the selected municipality.
 - Empty, malformed, or unsupported `localStorage` state does not break the app.
 - Static SPA routing works under Cloudflare Pages style fallback.
@@ -144,7 +146,7 @@ The initial release should support:
 
 - Nationwide map.
 - Pan and zoom.
-- Simplified municipality boundary shapes.
+- Triangle-grid municipality boundary shapes with cleanly matching borders.
 - Municipality click-to-visit behavior.
 - Automatic distinct coloring.
 - Per-municipality color adjustment.

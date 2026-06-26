@@ -10,11 +10,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "prepare:data": "node scripts/prepare-n03-data.mjs"
+    "prepare:data": "node --max-old-space-size=6144 scripts/prepare-n03-data.mjs"
   },
   "dependencies": {
     "@turf/bbox": "^7.2.0",
     "@turf/boolean-intersects": "^7.3.5",
+    "@turf/boolean-point-in-polygon": "^7.3.5",
     "@turf/simplify": "^7.3.5",
     "@turf/union": "^7.3.5",
     "but-unzip": "^0.1.10",
