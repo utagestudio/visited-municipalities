@@ -109,7 +109,7 @@ export function buildTriangleGridCollection(groups, options = {}) {
     forcedCells += 1;
   }
 
-  const { features, adjacency } = buildFeaturesFromAssignments(projectedGroups, assignmentByCellId);
+  const { features, adjacency } = buildFeaturesFromAssignments(projectedGroups, assignmentByCellId, cellSizeMeters);
 
   return {
     collection: {
@@ -346,11 +346,9 @@ function findContainingPiece(point, pieces) {
   return null;
 }
 
-function buildFeaturesFromAssignments(projectedGroups, assignmentByCellId) {
+function buildFeaturesFromAssignments(projectedGroups, assignmentByCellId, cellSizeMeters) {
   const propertiesByCode = new Map(projectedGroups.map((group) => [group.properties.municipalityCode, group.properties]));
   const directedBoundaryEdgesByCode = new Map();
-  const ownerByUndirectedEdge = new Map();
-  const adjacencySets = new Map(Array.from(propertiesByCode.keys(), (code) => [code, new Set()]));
 
   for (const { code, triangle } of assignmentByCellId.values()) {
     const edges = [
@@ -367,30 +365,11 @@ function buildFeaturesFromAssignments(projectedGroups, assignmentByCellId) {
       const toKey = pointKey(to);
       const forwardKey = `${fromKey}|${toKey}`;
       const reverseKey = `${toKey}|${fromKey}`;
-      const undirectedKey = fromKey < toKey ? `${fromKey}|${toKey}` : `${toKey}|${fromKey}`;
 
       if (codeEdges.has(reverseKey)) {
         codeEdges.delete(reverseKey);
       } else {
         codeEdges.set(forwardKey, { from, to, fromKey, toKey });
-      }
-
-      const owners = ownerByUndirectedEdge.get(undirectedKey) ?? new Set();
-      owners.add(code);
-      ownerByUndirectedEdge.set(undirectedKey, owners);
-    }
-  }
-
-  for (const owners of ownerByUndirectedEdge.values()) {
-    if (owners.size < 2) {
-      continue;
-    }
-
-    const codes = Array.from(owners);
-    for (let left = 0; left < codes.length; left += 1) {
-      for (let right = left + 1; right < codes.length; right += 1) {
-        adjacencySets.get(codes[left])?.add(codes[right]);
-        adjacencySets.get(codes[right])?.add(codes[left]);
       }
     }
   }
@@ -428,8 +407,9 @@ function buildFeaturesFromAssignments(projectedGroups, assignmentByCellId) {
     });
   }
 
+  const colorConflictSets = buildColorConflictSets(propertiesByCode, assignmentByCellId, cellSizeMeters);
   const adjacency = Object.fromEntries(
-    Array.from(adjacencySets, ([code, neighbors]) => [code, Array.from(neighbors).sort()]).filter(([code]) =>
+    Array.from(colorConflictSets, ([code, neighbors]) => [code, Array.from(neighbors).sort()]).filter(([code]) =>
       features.some((feature) => feature.properties.municipalityCode === code),
     ),
   );
@@ -438,6 +418,45 @@ function buildFeaturesFromAssignments(projectedGroups, assignmentByCellId) {
     features: features.sort((left, right) => left.properties.municipalityCode.localeCompare(right.properties.municipalityCode)),
     adjacency,
   };
+}
+
+export function buildColorConflictSets(propertiesByCode, assignmentByCellId, cellSizeMeters) {
+  const conflictDistance = cellSizeMeters * 1.25;
+  const conflictDistanceSquared = conflictDistance ** 2;
+  const binSize = conflictDistance;
+  const bins = new Map();
+  const conflictSets = new Map(Array.from(propertiesByCode.keys(), (code) => [code, new Set()]));
+
+  for (const [cellId, { code, triangle }] of assignmentByCellId) {
+    const centroid = triangleCentroid(triangle);
+    const cell = { cellId, code, centroid };
+    const binX = Math.floor(centroid[0] / binSize);
+    const binY = Math.floor(centroid[1] / binSize);
+
+    for (let y = binY - 1; y <= binY + 1; y += 1) {
+      for (let x = binX - 1; x <= binX + 1; x += 1) {
+        for (const other of bins.get(`${x}:${y}`) ?? []) {
+          if (other.code === code) {
+            continue;
+          }
+
+          if (squaredDistance(centroid, other.centroid) > conflictDistanceSquared) {
+            continue;
+          }
+
+          conflictSets.get(code)?.add(other.code);
+          conflictSets.get(other.code)?.add(code);
+        }
+      }
+    }
+
+    const binKey = `${binX}:${binY}`;
+    const existing = bins.get(binKey) ?? [];
+    existing.push(cell);
+    bins.set(binKey, existing);
+  }
+
+  return conflictSets;
 }
 
 function polygonizeDirectedEdges(edgeMap) {

@@ -36,7 +36,7 @@ await writeJson(path.join(outDir, 'manifest.json'), {
 });
 
 console.log(`Wrote ${processed.features.length} municipality features to ${outDir}`);
-console.log(`Wrote adjacency for ${Object.keys(adjacency).length} municipality keys`);
+console.log(`Wrote color proximity graph for ${Object.keys(adjacency).length} municipality keys`);
 console.log(`Generated ${stats.assignedCells.toLocaleString()} assigned triangle cells (${stats.forcedCells} forced)`);
 
 async function loadMunicipalityGroups() {
