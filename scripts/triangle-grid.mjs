@@ -138,7 +138,16 @@ export function shouldExcludeN03Feature(properties) {
     name.includes('荒川河口部') ||
     name.includes('中央防波堤') ||
     name.includes('境界部地先の埋立地') ||
-    name.includes('名古屋港口埋立地')
+    name.includes('名古屋港口埋立地') ||
+    name.includes('境界地先の土地') ||
+    name === 'ベヨネース列岩' ||
+    name === '須美寿島' ||
+    name === '鳥島' ||
+    name === '孀婦岩' ||
+    name === '羽島' ||
+    name === '鰹島' ||
+    name.startsWith('鷹島（') ||
+    name.startsWith('津倉瀬（')
   );
 }
 
