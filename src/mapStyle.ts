@@ -35,7 +35,7 @@ export function createFillLayer(state: SavedState): FillLayerSpecification {
     source: MUNICIPALITY_SOURCE_ID,
     paint: {
       'fill-color': buildFillColorExpression(state),
-      'fill-opacity': 0.92,
+      'fill-opacity': 1,
     },
   };
 }

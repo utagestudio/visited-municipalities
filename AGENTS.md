@@ -41,8 +41,8 @@ The expected deployment target is Cloudflare Pages.
 - Do not ship the original large source dataset to production.
 - Preprocess the data before build into lightweight GeoJSON suitable for browser delivery.
 - Reconstruct municipality geometry as a fixed-size equilateral triangle grid during preprocessing. This intentionally favors clean, matching boundaries and pleasant fill behavior over precise administrative shapes.
-- Use a 4000 meter triangle side length and 50% land coverage threshold by default.
-- Exclude unassigned or owner-unclear reclaimed lands, such as `所属未定地`, `中央防波堤外側廃棄物処理場`, `名古屋港口埋立地`, and `境界部地先の埋立地`.
+- Use a 3000 meter triangle side length and 50% land coverage threshold by default.
+- Exclude unassigned or owner-unclear reclaimed lands, such as `所属未定地`, `荒川河口部`, `中央防波堤外側廃棄物処理場`, `名古屋港口埋立地`, and `境界部地先の埋立地`.
 - Aggregate designated city wards into city-level features. Tokyo's 23 special wards must remain ward-level features.
 - Keep only the attributes needed by the app:
   - `municipalityCode`

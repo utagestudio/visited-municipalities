@@ -5,7 +5,7 @@ const MAX_MERCATOR_LATITUDE = 85.05112878;
 const DEFAULT_PROGRESS_INTERVAL_MS = 5000;
 
 export function buildTriangleGridCollection(groups, options = {}) {
-  const cellSizeMeters = Number(options.cellSizeMeters ?? 4000);
+  const cellSizeMeters = Number(options.cellSizeMeters ?? 3000);
   const coverageThreshold = Number(options.coverageThreshold ?? 0.5);
   const progressIntervalMs = Number(options.progressIntervalMs ?? DEFAULT_PROGRESS_INTERVAL_MS);
   const logger = options.logger ?? console;
@@ -135,6 +135,7 @@ export function shouldExcludeN03Feature(properties) {
 
   return (
     name.includes('所属未定') ||
+    name.includes('荒川河口部') ||
     name.includes('中央防波堤') ||
     name.includes('境界部地先の埋立地') ||
     name.includes('名古屋港口埋立地')
