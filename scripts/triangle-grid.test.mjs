@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { buildTriangleGridCollection, shouldExcludeN03Feature } from './triangle-grid.mjs';
+import { buildColorConflictSets, buildTriangleGridCollection, shouldExcludeN03Feature } from './triangle-grid.mjs';
 
 describe('triangle grid preprocessing', () => {
-  it('builds edge-based adjacency from assigned triangle cells', () => {
+  it('builds color conflicts from assigned triangle cells', () => {
     const groups = new Map([
       ['left', createGroup('left', 'Left', [[-1, 0], [0, 0], [0, 1], [-1, 1], [-1, 0]])],
       ['right', createGroup('right', 'Right', [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]])],
@@ -19,6 +19,26 @@ describe('triangle grid preprocessing', () => {
     expect(adjacency.left).toContain('right');
     expect(adjacency.right).toContain('left');
     expect(stats.assignedCells).toBeGreaterThan(0);
+  });
+
+  it('treats vertex-near triangle cells as color conflicts', () => {
+    const propertiesByCode = new Map([
+      ['near-left', {}],
+      ['near-right', {}],
+      ['far', {}],
+    ]);
+    const assignmentByCellId = new Map([
+      ['0:0:0', { code: 'near-left', triangle: [[0, 0], [10, 0], [5, 8.660254]] }],
+      ['0:1:0', { code: 'near-right', triangle: [[10, 0], [20, 0], [15, 8.660254]] }],
+      ['0:10:0', { code: 'far', triangle: [[100, 0], [110, 0], [105, 8.660254]] }],
+    ]);
+
+    const conflicts = buildColorConflictSets(propertiesByCode, assignmentByCellId, 10);
+
+    expect(conflicts.get('near-left')).toContain('near-right');
+    expect(conflicts.get('near-right')).toContain('near-left');
+    expect(conflicts.get('near-left')).not.toContain('far');
+    expect(conflicts.get('far')?.size).toBe(0);
   });
 
   it('keeps tiny municipalities clickable by forcing their best cell', () => {

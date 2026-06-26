@@ -15,7 +15,7 @@ The expected deployment target is Cloudflare Pages.
 - Treat Tokyo's 23 special wards as individual units, but aggregate designated city wards into their parent city.
 - Toggle a municipality to visited when clicked.
 - Automatically assign a fill color when a municipality is marked visited.
-- Choose automatic colors so adjacent visited municipalities are visually distinct, especially by hue.
+- Choose automatic colors so nearby visited municipalities are visually distinct, especially by hue.
 - Allow the user to manually adjust the color of each visited municipality later.
 - Store visited municipality state and color in `localStorage`.
 - Restore saved state when the page is reopened.
@@ -67,11 +67,11 @@ The expected deployment target is Cloudflare Pages.
 
 ## Adjacency Data
 
-- Do not calculate municipality adjacency in the browser at runtime.
-- Generate an adjacency list during preprocessing from shared triangle-cell edges.
-- Store adjacency as a static JSON asset keyed by the same municipality keys used in saved state.
-- The browser should only look up adjacent municipality keys from the precomputed adjacency list when choosing colors.
-- Adjacency for aggregated designated cities must be calculated after aggregation so city-level units behave correctly.
+- Do not calculate municipality proximity for color selection in the browser at runtime.
+- Generate a color-conflict proximity graph during preprocessing from nearby triangle cells.
+- Store the proximity graph as a static JSON asset keyed by the same municipality keys used in saved state.
+- The browser should only look up nearby municipality keys from the precomputed graph when choosing colors.
+- Proximity for aggregated designated cities must be calculated after aggregation so city-level units behave correctly.
 
 ## Persistence Contract
 
@@ -106,8 +106,8 @@ When restoring state:
 ## Color Selection
 
 - Generate automatic colors in HSL space.
-- Prefer colors whose hue differs sufficiently from adjacent visited municipalities.
-- Use the precomputed adjacency list to compare against already visited adjacent municipalities.
+- Prefer colors whose hue differs sufficiently from nearby visited municipalities.
+- Use the precomputed proximity graph to compare against already visited nearby municipalities.
 - If hue-only choices are insufficient, vary saturation and lightness while keeping colors readable.
 - Manual color changes override automatic color selection for that municipality.
 
@@ -134,8 +134,8 @@ Implement tests for:
 - Reloading restores visited municipalities and colors.
 - Unmarking a municipality removes it from saved state.
 - Manual color changes update saved state.
-- Automatic colors avoid close hues among adjacent visited municipalities.
-- The precomputed adjacency list is used for color selection instead of runtime polygon intersection.
+- Automatic colors avoid close hues among nearby visited municipalities.
+- The precomputed proximity graph is used for color selection instead of runtime polygon intersection.
 - Search zooms to the selected municipality.
 - Empty, malformed, or unsupported `localStorage` state does not break the app.
 - Static SPA routing works under Cloudflare Pages style fallback.
