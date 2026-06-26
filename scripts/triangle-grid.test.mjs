@@ -40,6 +40,7 @@ describe('triangle grid preprocessing', () => {
 
   it('excludes known unassigned reclaimed lands from source N03 features', () => {
     expect(shouldExcludeN03Feature({ N03_004: '所属未定地' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '荒川河口部' })).toBe(true);
     expect(shouldExcludeN03Feature({ N03_004: '中央防波堤外側廃棄物処理場（中潮橋南側）' })).toBe(true);
     expect(shouldExcludeN03Feature({ N03_004: 'うるま市・金武町境界部地先の埋立地' })).toBe(true);
     expect(shouldExcludeN03Feature({ N03_004: '千代田区' })).toBe(false);

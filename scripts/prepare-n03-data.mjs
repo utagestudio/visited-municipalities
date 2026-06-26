@@ -7,7 +7,7 @@ const root = process.cwd();
 const sourcePath = process.env.N03_GEOJSON;
 const zipDir = process.env.N03_ZIP_DIR ?? path.join(root, 'data', 'raw');
 const sourceDate = process.env.N03_SOURCE_DATE ?? 'manual';
-const triangleCellSizeMeters = Number(process.env.TRIANGLE_CELL_SIZE_METERS ?? '4000');
+const triangleCellSizeMeters = Number(process.env.TRIANGLE_CELL_SIZE_METERS ?? '3000');
 const triangleCoverageThreshold = Number(process.env.TRIANGLE_COVERAGE_THRESHOLD ?? '0.5');
 const outDir = path.join(root, 'public', 'data');
 
