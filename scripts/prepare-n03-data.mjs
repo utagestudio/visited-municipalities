@@ -1,35 +1,43 @@
 import { iter } from 'but-unzip';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import bbox from '@turf/bbox';
-import booleanIntersects from '@turf/boolean-intersects';
-import simplify from '@turf/simplify';
-import union from '@turf/union';
+import { buildTriangleGridCollection, shouldExcludeN03Feature } from './triangle-grid.mjs';
 
 const root = process.cwd();
 const sourcePath = process.env.N03_GEOJSON;
 const zipDir = process.env.N03_ZIP_DIR ?? path.join(root, 'data', 'raw');
 const sourceDate = process.env.N03_SOURCE_DATE ?? 'manual';
-const tolerance = Number(process.env.SIMPLIFY_TOLERANCE ?? '0.01');
+const triangleCellSizeMeters = Number(process.env.TRIANGLE_CELL_SIZE_METERS ?? '4000');
+const triangleCoverageThreshold = Number(process.env.TRIANGLE_COVERAGE_THRESHOLD ?? '0.5');
 const outDir = path.join(root, 'public', 'data');
 
 await mkdir(outDir, { recursive: true });
 
 const groups = await loadMunicipalityGroups();
-const processed = buildMunicipalityCollection(groups);
-const adjacency = buildAdjacency(processed.features);
+const {
+  collection: processed,
+  adjacency,
+  stats,
+} = buildTriangleGridCollection(groups, {
+  cellSizeMeters: triangleCellSizeMeters,
+  coverageThreshold: triangleCoverageThreshold,
+});
 
 await writeJson(path.join(outDir, 'municipalities.generated.geojson'), processed);
 await writeJson(path.join(outDir, 'adjacency.generated.json'), adjacency);
 await writeJson(path.join(outDir, 'manifest.json'), {
   datasetName: 'generated-n03',
   sourceDate,
+  geometryMode: 'triangle-grid',
+  triangleCellSizeMeters,
+  triangleCoverageThreshold,
   municipalities: '/data/municipalities.generated.geojson',
   adjacency: '/data/adjacency.generated.json',
 });
 
 console.log(`Wrote ${processed.features.length} municipality features to ${outDir}`);
 console.log(`Wrote adjacency for ${Object.keys(adjacency).length} municipality keys`);
+console.log(`Generated ${stats.assignedCells.toLocaleString()} assigned triangle cells (${stats.forcedCells} forced)`);
 
 async function loadMunicipalityGroups() {
   const groups = new Map();
@@ -87,13 +95,11 @@ function addFeaturesToGroups(groups, features) {
       continue;
     }
 
-    const mergeInternalBoundaries = normalized.properties.municipalityCode.startsWith('designated-city:');
-    const feature = mergeInternalBoundaries ? normalized : simplifyFeature(normalized);
+    const feature = normalized;
     const municipalityCode = feature.properties.municipalityCode;
     const group = groups.get(municipalityCode) ?? {
       properties: feature.properties,
       polygons: [],
-      mergeInternalBoundaries,
     };
 
     if (feature.geometry.type === 'Polygon') {
@@ -108,6 +114,10 @@ function addFeaturesToGroups(groups, features) {
 
 function normalizeN03Feature(feature) {
   const props = feature.properties ?? {};
+  if (shouldExcludeN03Feature(props)) {
+    return null;
+  }
+
   const rawPrefectureName = props.N03_001;
   const prefectureName = normalizePrefectureName(rawPrefectureName);
   const districtOrDesignatedCityName = props.N03_003;
@@ -159,100 +169,6 @@ function isTokyoSpecialWardCode(rawCode) {
 
 function toDesignatedCityCode(prefectureName, cityName) {
   return `designated-city:${prefectureName}:${cityName}`;
-}
-
-function buildMunicipalityCollection(groups) {
-  return {
-    type: 'FeatureCollection',
-    features: Array.from(groups.values()).map(buildMunicipalityFeature),
-  };
-}
-
-function buildMunicipalityFeature(group) {
-  const feature = {
-    type: 'Feature',
-    properties: group.properties,
-    geometry:
-      group.polygons.length === 1
-        ? {
-            type: 'Polygon',
-            coordinates: group.polygons[0],
-          }
-        : {
-            type: 'MultiPolygon',
-            coordinates: group.polygons,
-          },
-  };
-
-  if (!group.mergeInternalBoundaries || group.polygons.length < 2) {
-    return feature;
-  }
-
-  try {
-    const unioned = union(
-      {
-        type: 'FeatureCollection',
-        features: group.polygons.map((coordinates) => ({
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'Polygon',
-            coordinates,
-          },
-        })),
-      },
-      {
-        properties: group.properties,
-      },
-    );
-
-    if (unioned) {
-      return simplifyFeature(unioned);
-    }
-  } catch (error) {
-    console.warn(`Failed to union ${group.properties.displayName}; keeping separate polygons.`, error);
-  }
-
-  return simplifyFeature(feature);
-}
-
-function simplifyFeature(feature) {
-  return simplify(feature, {
-    tolerance,
-    highQuality: false,
-    mutate: false,
-  });
-}
-
-function buildAdjacency(features) {
-  const boxes = features.map((feature) => ({
-    code: feature.properties.municipalityCode,
-    box: bbox(feature),
-    feature,
-  }));
-  const adjacency = Object.fromEntries(features.map((feature) => [feature.properties.municipalityCode, []]));
-
-  for (let leftIndex = 0; leftIndex < boxes.length; leftIndex += 1) {
-    for (let rightIndex = leftIndex + 1; rightIndex < boxes.length; rightIndex += 1) {
-      const left = boxes[leftIndex];
-      const right = boxes[rightIndex];
-
-      if (!bboxTouches(left.box, right.box)) {
-        continue;
-      }
-
-      if (booleanIntersects(left.feature, right.feature)) {
-        adjacency[left.code].push(right.code);
-        adjacency[right.code].push(left.code);
-      }
-    }
-  }
-
-  return Object.fromEntries(Object.entries(adjacency).map(([code, neighbors]) => [code, neighbors.sort()]));
-}
-
-function bboxTouches(left, right) {
-  return left[0] <= right[2] && left[2] >= right[0] && left[1] <= right[3] && left[3] >= right[1];
 }
 
 async function writeJson(filePath, value) {

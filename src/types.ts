@@ -26,6 +26,9 @@ export type SavedState = {
 export type DataManifest = {
   datasetName: string;
   sourceDate: string;
+  geometryMode?: 'triangle-grid';
+  triangleCellSizeMeters?: number;
+  triangleCoverageThreshold?: number;
   municipalities: string;
   adjacency: string;
 };
