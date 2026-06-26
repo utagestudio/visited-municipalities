@@ -39,8 +39,10 @@ The expected deployment target is Cloudflare Pages.
 - Source page: https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_1.html
 - As of 2026-06-18, the latest data listed on that page should be treated as the January 1, 2023 administrative area data.
 - Do not ship the original large source dataset to production.
-- Preprocess the data before build into lightweight GeoJSON or TopoJSON suitable for browser delivery.
-- Simplify municipality boundary geometry during preprocessing. Shape accuracy can be reduced as needed for responsive browser rendering.
+- Preprocess the data before build into lightweight GeoJSON suitable for browser delivery.
+- Reconstruct municipality geometry as a fixed-size equilateral triangle grid during preprocessing. This intentionally favors clean, matching boundaries and pleasant fill behavior over precise administrative shapes.
+- Use a 4000 meter triangle side length and 50% land coverage threshold by default.
+- Exclude unassigned or owner-unclear reclaimed lands, such as `所属未定地`, `中央防波堤外側廃棄物処理場`, `名古屋港口埋立地`, and `境界部地先の埋立地`.
 - Aggregate designated city wards into city-level features. Tokyo's 23 special wards must remain ward-level features.
 - Keep only the attributes needed by the app:
   - `municipalityCode`
@@ -51,7 +53,7 @@ The expected deployment target is Cloudflare Pages.
 - For aggregated designated cities, use a deterministic app-level municipality key rather than ward-level `N03_007` codes.
 - Remove unnecessary attributes and split files if needed so nationwide loading remains practical.
 - Prefer a Cloudflare-friendly static data layout:
-  - simplified TopoJSON or GeoJSON assets;
+  - generated triangle-grid GeoJSON assets;
   - compressed static delivery;
   - lazy loading by prefecture or region if a nationwide single file is too large.
 
@@ -66,7 +68,7 @@ The expected deployment target is Cloudflare Pages.
 ## Adjacency Data
 
 - Do not calculate municipality adjacency in the browser at runtime.
-- Generate an adjacency list during preprocessing from the simplified or source municipality geometry.
+- Generate an adjacency list during preprocessing from shared triangle-cell edges.
 - Store adjacency as a static JSON asset keyed by the same municipality keys used in saved state.
 - The browser should only look up adjacent municipality keys from the precomputed adjacency list when choosing colors.
 - Adjacency for aggregated designated cities must be calculated after aggregation so city-level units behave correctly.
@@ -144,7 +146,7 @@ The initial release should support:
 
 - Nationwide map.
 - Pan and zoom.
-- Simplified municipality boundary shapes.
+- Triangle-grid municipality boundary shapes with cleanly matching borders.
 - Municipality click-to-visit behavior.
 - Automatic distinct coloring.
 - Per-municipality color adjustment.
