@@ -43,6 +43,15 @@ describe('triangle grid preprocessing', () => {
     expect(shouldExcludeN03Feature({ N03_004: '荒川河口部' })).toBe(true);
     expect(shouldExcludeN03Feature({ N03_004: '中央防波堤外側廃棄物処理場（中潮橋南側）' })).toBe(true);
     expect(shouldExcludeN03Feature({ N03_004: 'うるま市・金武町境界部地先の埋立地' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '市川市・船橋市境界地先の土地' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: 'ベヨネース列岩' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '須美寿島' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '鳥島' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '孀婦岩' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '羽島' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '鰹島' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '鷹島（甑島南方）' })).toBe(true);
+    expect(shouldExcludeN03Feature({ N03_004: '津倉瀬（宇治群島北東方）' })).toBe(true);
     expect(shouldExcludeN03Feature({ N03_004: '千代田区' })).toBe(false);
   });
 });
