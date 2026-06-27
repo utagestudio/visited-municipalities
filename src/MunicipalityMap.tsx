@@ -1,10 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { type CSSProperties, useEffect, useRef } from 'react';
 import bbox from '@turf/bbox';
 import maplibregl, { GeoJSONSource, Map } from 'maplibre-gl';
 import type { MunicipalityCollection } from './types';
 import type { SavedState } from './types';
 import {
-  BACKGROUND_LAYER_ID,
   createBlankMapStyle,
   createBorderLayer,
   createFillLayer,
@@ -64,12 +63,15 @@ export function MunicipalityMap({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: createBlankMapStyle(state.backgroundColor),
+      style: createBlankMapStyle(),
       center: [138.3, 37.8],
       zoom: 4.2,
       attributionControl: false,
       dragRotate: false,
       pitchWithRotate: false,
+      canvasContextAttributes: {
+        alpha: true,
+      },
     });
 
     map.dragRotate.disable();
@@ -204,7 +206,6 @@ export function MunicipalityMap({
     }
 
     map.setPaintProperty(MUNICIPALITY_FILL_LAYER_ID, 'fill-color', createFillLayer(state).paint?.['fill-color']);
-    map.setPaintProperty(BACKGROUND_LAYER_ID, 'background-color', state.backgroundColor);
   }, [state]);
 
   useEffect(() => {
@@ -246,7 +247,14 @@ export function MunicipalityMap({
     });
   }, [focusCode, municipalities]);
 
-  return <div className="map" ref={containerRef} aria-label="市区町村マップ" />;
+  return (
+    <div
+      className="map"
+      ref={containerRef}
+      style={{ '--map-background-color': state.backgroundColor } as CSSProperties}
+      aria-label="市区町村マップ"
+    />
+  );
 }
 
 function getMunicipalityFeatureAtPoint(map: Map, point: maplibregl.PointLike) {

@@ -7,10 +7,8 @@ describe('mapStyle', () => {
     expect(buildFillColorExpression(emptyState())).toBe('#ffffff');
   });
 
-  it('uses the configured background color', () => {
-    const backgroundLayer = createBlankMapStyle('#ddeeff').layers[0] as { paint: { 'background-color': string } };
-
-    expect(backgroundLayer.paint['background-color']).toBe('#ddeeff');
+  it('leaves the map background to CSS instead of drawing it in canvas', () => {
+    expect(createBlankMapStyle().layers).toEqual([]);
   });
 
   it('uses a match expression when municipalities are visited', () => {

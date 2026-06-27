@@ -6,27 +6,17 @@ import type {
   StyleSpecification,
 } from 'maplibre-gl';
 import type { SavedState } from './types';
-import { DEFAULT_BACKGROUND_COLOR } from './storage';
 
-export const BACKGROUND_LAYER_ID = 'background';
 export const MUNICIPALITY_SOURCE_ID = 'municipalities';
 export const MUNICIPALITY_FILL_LAYER_ID = 'municipality-fill';
 export const MUNICIPALITY_BORDER_LAYER_ID = 'municipality-border';
 export const MUNICIPALITY_SELECTED_BORDER_LAYER_ID = 'municipality-selected-border';
 
-export function createBlankMapStyle(backgroundColor: string = DEFAULT_BACKGROUND_COLOR): StyleSpecification {
+export function createBlankMapStyle(): StyleSpecification {
   return {
     version: 8,
     sources: {},
-    layers: [
-      {
-        id: BACKGROUND_LAYER_ID,
-        type: 'background',
-        paint: {
-          'background-color': backgroundColor,
-        },
-      },
-    ],
+    layers: [],
   };
 }
 

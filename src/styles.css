@@ -46,6 +46,11 @@ button:disabled {
 .map {
   width: 100%;
   height: 100vh;
+  background: var(--map-background-color, #eef2f3);
+}
+
+.map .maplibregl-canvas {
+  background: transparent;
 }
 
 .sidePanel {
