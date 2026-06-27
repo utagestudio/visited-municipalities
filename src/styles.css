@@ -329,7 +329,8 @@ button:disabled {
 }
 
 .backgroundPanel {
-  padding-bottom: 2px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #d7dee2;
 }
 
 .mutedPanel {
