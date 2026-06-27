@@ -381,6 +381,16 @@ button:disabled {
   font-size: 12px;
 }
 
+.panelFooter a {
+  color: #277183;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.panelFooter a:hover {
+  text-decoration: underline;
+}
+
 .emptyState {
   display: grid;
   min-height: 100vh;

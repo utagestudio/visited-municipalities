@@ -467,6 +467,12 @@ export function App() {
         </section>
 
         <footer className="panelFooter">
+          <span>
+            制作者:{' '}
+            <a href="https://utage.games" target="_blank" rel="noreferrer">
+              UTAGE.GAMES
+            </a>
+          </span>
           <span>データ: {mapData.manifest.datasetName}</span>
           <span>基準日: {mapData.manifest.sourceDate}</span>
         </footer>
