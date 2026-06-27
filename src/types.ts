@@ -20,6 +20,7 @@ export type SavedMunicipality = {
 export type SavedState = {
   version: 1;
   updatedAt: string;
+  backgroundColor: string;
   municipalities: Record<string, SavedMunicipality>;
 };
 

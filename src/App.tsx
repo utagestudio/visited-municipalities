@@ -6,6 +6,7 @@ import { loadMapData, type LoadedMapData } from './data';
 import { createShareUrl, isShareUrl, readSharedStateFromUrl } from './share';
 import {
   createEmptyState,
+  DEFAULT_BACKGROUND_COLOR,
   loadSavedState,
   parseSavedState,
   pruneStateToKnownMunicipalities,
@@ -179,6 +180,20 @@ export function App() {
       });
     },
     [isReadOnlyShare, selectedCode],
+  );
+
+  const changeBackgroundColor = useCallback(
+    (backgroundColor: string) => {
+      if (isReadOnlyShare) {
+        return;
+      }
+
+      setState((current) => ({
+        ...current,
+        backgroundColor,
+      }));
+    },
+    [isReadOnlyShare],
   );
 
   const resetAll = useCallback(() => {
@@ -388,6 +403,12 @@ export function App() {
         />
 
         <section className="panelSection actionPanel" aria-label="操作">
+          <BackgroundSettings
+            color={state.backgroundColor}
+            onColorChange={changeBackgroundColor}
+            readOnly={isReadOnlyShare}
+          />
+
           <div className="fileActions">
             <button className="ghostButton" type="button" onClick={shareCurrentState}>
               <ButtonIcon type="share" />
@@ -515,6 +536,43 @@ function MunicipalityDetails({
         <ButtonIcon type="trash" />
         訪問解除
       </button>
+    </section>
+  );
+}
+
+function BackgroundSettings({
+  color,
+  onColorChange,
+  readOnly,
+}: {
+  color: string;
+  onColorChange: (color: string) => void;
+  readOnly: boolean;
+}) {
+  return (
+    <section className="panelSection backgroundPanel">
+      <div className="backgroundEditor">
+        <label className="fieldLabel" htmlFor="background-color">
+          背景色
+        </label>
+        <div className="backgroundControls">
+          <input
+            id="background-color"
+            type="color"
+            value={toColorInputValue(color)}
+            onChange={(event) => onColorChange(event.target.value)}
+            disabled={readOnly}
+          />
+          <button
+            className="ghostButton compactButton"
+            type="button"
+            onClick={() => onColorChange(DEFAULT_BACKGROUND_COLOR)}
+            disabled={readOnly || color.toLowerCase() === DEFAULT_BACKGROUND_COLOR}
+          >
+            標準
+          </button>
+        </div>
+      </div>
     </section>
   );
 }

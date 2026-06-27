@@ -4,6 +4,7 @@ import maplibregl, { GeoJSONSource, Map } from 'maplibre-gl';
 import type { MunicipalityCollection } from './types';
 import type { SavedState } from './types';
 import {
+  BACKGROUND_LAYER_ID,
   createBlankMapStyle,
   createBorderLayer,
   createFillLayer,
@@ -63,7 +64,7 @@ export function MunicipalityMap({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: createBlankMapStyle(),
+      style: createBlankMapStyle(state.backgroundColor),
       center: [138.3, 37.8],
       zoom: 4.2,
       attributionControl: false,
@@ -203,6 +204,7 @@ export function MunicipalityMap({
     }
 
     map.setPaintProperty(MUNICIPALITY_FILL_LAYER_ID, 'fill-color', createFillLayer(state).paint?.['fill-color']);
+    map.setPaintProperty(BACKGROUND_LAYER_ID, 'background-color', state.backgroundColor);
   }, [state]);
 
   useEffect(() => {
