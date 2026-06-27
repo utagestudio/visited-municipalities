@@ -112,6 +112,12 @@ button:disabled {
   padding: 0 12px;
 }
 
+.compactButton {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
 .buttonIcon {
   display: inline-grid;
   flex: 0 0 auto;
@@ -322,6 +328,11 @@ button:disabled {
   border-top: 1px solid #d7dee2;
 }
 
+.backgroundPanel {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #d7dee2;
+}
+
 .mutedPanel {
   color: #66757f;
 }
@@ -339,7 +350,21 @@ button:disabled {
   gap: 12px;
 }
 
-.colorEditor input {
+.backgroundEditor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.backgroundControls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colorEditor input,
+.backgroundEditor input {
   width: 56px;
   height: 36px;
   padding: 2px;
@@ -354,6 +379,16 @@ button:disabled {
   gap: 4px;
   color: #66757f;
   font-size: 12px;
+}
+
+.panelFooter a {
+  color: #277183;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.panelFooter a:hover {
+  text-decoration: underline;
 }
 
 .emptyState {

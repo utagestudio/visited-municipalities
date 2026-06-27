@@ -23,6 +23,7 @@ describe('storage', () => {
       {
         version: 1,
         updatedAt: '2026-06-18T00:00:00.000Z',
+        backgroundColor: '#ddeeff',
         municipalities: {
           'sample:tokyo:chiyoda': {
             visited: true,
@@ -34,6 +35,7 @@ describe('storage', () => {
     );
 
     expect(loadSavedState(storage).municipalities['sample:tokyo:chiyoda']?.color).toBe('#cc3344');
+    expect(loadSavedState(storage).backgroundColor).toBe('#ddeeff');
   });
 
   it('prunes unknown municipality codes', () => {
@@ -41,6 +43,7 @@ describe('storage', () => {
       {
         version: 1,
         updatedAt: '2026-06-18T00:00:00.000Z',
+        backgroundColor: '#eef2f3',
         municipalities: {
           keep: {
             visited: true,
@@ -62,6 +65,7 @@ describe('storage', () => {
     const state = {
       version: 1,
       updatedAt: '2026-06-18T00:00:00.000Z',
+      backgroundColor: '#ddeeff',
       municipalities: {
         keep: {
           visited: true,
@@ -71,6 +75,11 @@ describe('storage', () => {
     } as const;
 
     expect(parseSavedState(serializeSavedState(state)).municipalities.keep.color).toBe('#123456');
+    expect(parseSavedState(serializeSavedState(state)).backgroundColor).toBe('#ddeeff');
+  });
+
+  it('uses the default background color for older states', () => {
+    expect(parseSavedState(JSON.stringify({ version: 1, municipalities: {} })).backgroundColor).toBe('#eef2f3');
   });
 
   it('rejects unsupported export versions', () => {

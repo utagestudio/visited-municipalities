@@ -21,6 +21,7 @@ describe('colors', () => {
     const state: SavedState = {
       version: 1,
       updatedAt: '2026-06-18T00:00:00.000Z',
+      backgroundColor: '#eef2f3',
       municipalities: {
         left: {
           visited: true,

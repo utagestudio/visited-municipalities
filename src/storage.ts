@@ -1,11 +1,13 @@
 import type { SavedState } from './types';
 
 export const STORAGE_KEY = 'visitedMunicipalityMap:v1';
+export const DEFAULT_BACKGROUND_COLOR = '#eef2f3';
 
 export function createEmptyState(): SavedState {
   return {
     version: 1,
     updatedAt: new Date().toISOString(),
+    backgroundColor: DEFAULT_BACKGROUND_COLOR,
     municipalities: {},
   };
 }
@@ -53,6 +55,10 @@ export function parseSavedState(raw: string): SavedState {
   return {
     version: 1,
     updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : new Date().toISOString(),
+    backgroundColor:
+      typeof parsed.backgroundColor === 'string' && isHexColor(parsed.backgroundColor)
+        ? parsed.backgroundColor
+        : DEFAULT_BACKGROUND_COLOR,
     municipalities: Object.fromEntries(
       Object.entries(parsed.municipalities).filter(
         ([, value]) =>
@@ -76,4 +82,8 @@ export function serializeSavedState(state: SavedState): string {
     null,
     2,
   )}\n`;
+}
+
+export function isHexColor(color: string): boolean {
+  return /^#[\da-f]{6}$/i.test(color);
 }

@@ -1,10 +1,12 @@
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
+import { DEFAULT_BACKGROUND_COLOR, isHexColor } from './storage';
 import type { SavedState } from './types';
 
 const SHARE_PARAM = 'share';
 
 type CompactSharedState = {
   v: 1;
+  b?: string;
   m: Array<[string, string]>;
 };
 
@@ -28,6 +30,7 @@ export function isShareUrl(url: string = window.location.href): boolean {
 export function encodeSharedState(state: SavedState): string {
   const compact: CompactSharedState = {
     v: 1,
+    b: state.backgroundColor,
     m: Object.entries(state.municipalities).map(([municipalityCode, municipality]) => [
       municipalityCode,
       municipality.color,
@@ -53,6 +56,7 @@ export function decodeSharedState(payload: string): SavedState {
   return {
     version: 1,
     updatedAt: new Date().toISOString(),
+    backgroundColor: typeof parsed.b === 'string' && isHexColor(parsed.b) ? parsed.b : DEFAULT_BACKGROUND_COLOR,
     municipalities: Object.fromEntries(
       parsed.m.filter(isCompactMunicipalityEntry).map(([municipalityCode, color]) => [
         municipalityCode,
