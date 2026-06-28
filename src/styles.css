@@ -53,6 +53,26 @@ button:disabled {
   background: transparent;
 }
 
+.municipalityTooltip {
+  pointer-events: none;
+}
+
+.municipalityTooltip .maplibregl-popup-content {
+  padding: 5px 8px;
+  border: 1px solid #bac5cb;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 6px 18px rgb(23 32 38 / 14%);
+  color: #172026;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.municipalityTooltip .maplibregl-popup-tip {
+  display: none;
+}
+
 .sidePanel {
   display: flex;
   flex-direction: column;

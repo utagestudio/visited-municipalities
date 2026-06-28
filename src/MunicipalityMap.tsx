@@ -43,6 +43,7 @@ export function MunicipalityMap({
   const longPressTimerRef = useRef<number | null>(null);
   const longPressStartRef = useRef<{ x: number; y: number; municipalityCode: string } | null>(null);
   const ignoreNextClickRef = useRef(false);
+  const hoverPopupRef = useRef<maplibregl.Popup | null>(null);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -92,6 +93,10 @@ export function MunicipalityMap({
       map.addLayer(createSelectedBorderLayer(selectedCode));
       fitToCollection(map, municipalities);
     });
+
+    const hideHoverTooltip = () => {
+      hoverPopupRef.current?.remove();
+    };
 
     const clearLongPress = () => {
       if (longPressTimerRef.current !== null) {
@@ -183,17 +188,39 @@ export function MunicipalityMap({
 
     map.on('mousemove', (event) => {
       if (!map.getLayer(MUNICIPALITY_FILL_LAYER_ID)) {
+        hideHoverTooltip();
         return;
       }
 
-      const features = map.queryRenderedFeatures(event.point, { layers: [MUNICIPALITY_FILL_LAYER_ID] });
-      map.getCanvas().style.cursor = features.length > 0 ? 'pointer' : '';
+      const feature = getMunicipalityFeatureAtPoint(map, event.point);
+      const displayName = feature?.properties?.displayName;
+      map.getCanvas().style.cursor = typeof displayName === 'string' ? 'pointer' : '';
+
+      if (typeof displayName !== 'string') {
+        hideHoverTooltip();
+        return;
+      }
+
+      const popup =
+        hoverPopupRef.current ??
+        new maplibregl.Popup({
+          className: 'municipalityTooltip',
+          closeButton: false,
+          closeOnClick: false,
+          offset: 12,
+        });
+
+      hoverPopupRef.current = popup.setLngLat(event.lngLat).setText(displayName).addTo(map);
     });
+    map.getCanvas().addEventListener('mouseleave', hideHoverTooltip);
 
     mapRef.current = map;
 
     return () => {
       clearLongPress();
+      map.getCanvas().removeEventListener('mouseleave', hideHoverTooltip);
+      hoverPopupRef.current?.remove();
+      hoverPopupRef.current = null;
       map.remove();
       mapRef.current = null;
     };
