@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
+    "prepare:stats": "node scripts/prepare-municipality-stats.mjs",
     "prepare:data": "node --max-old-space-size=6144 scripts/prepare-n03-data.mjs"
   },
   "dependencies": {

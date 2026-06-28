@@ -329,6 +329,7 @@ export function App() {
       <section className="mapRegion">
         <MunicipalityMap
           municipalities={mapData.municipalities}
+          stats={mapData.stats}
           state={state}
           selectedCode={selectedCode}
           focusCode={focusCode}
