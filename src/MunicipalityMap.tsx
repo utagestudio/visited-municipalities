@@ -299,22 +299,34 @@ function createTooltipContent(displayName: string, stats: MunicipalityStatsMap[s
   root.append(title);
 
   const population = document.createElement('span');
-  population.textContent = `人口: ${formatPopulation(stats?.population)}`;
+  population.textContent = `人口: ${formatPopulation(stats?.population, stats?.populationAsOf)}`;
   root.append(population);
 
   const area = document.createElement('span');
-  area.textContent = `面積: ${formatArea(stats?.areaKm2)}`;
+  area.textContent = `面積: ${formatArea(stats?.areaKm2, stats?.areaAsOf)}`;
   root.append(area);
 
   return root;
 }
 
-function formatPopulation(population: number | undefined): string {
-  return typeof population === 'number' ? `${population.toLocaleString('ja-JP')}人` : 'データなし';
+function formatPopulation(population: number | undefined, asOf: string | undefined): string {
+  if (typeof population !== 'number') {
+    return 'データなし';
+  }
+
+  return withAsOf(`${population.toLocaleString('ja-JP')}人`, asOf);
 }
 
-function formatArea(areaKm2: number | undefined): string {
-  return typeof areaKm2 === 'number' ? `${areaKm2.toLocaleString('ja-JP', { maximumFractionDigits: 2 })}km²` : 'データなし';
+function formatArea(areaKm2: number | undefined, asOf: string | undefined): string {
+  if (typeof areaKm2 !== 'number') {
+    return 'データなし';
+  }
+
+  return withAsOf(`${areaKm2.toLocaleString('ja-JP', { maximumFractionDigits: 2 })}km²`, asOf);
+}
+
+function withAsOf(value: string, asOf: string | undefined): string {
+  return asOf ? `${value}（${asOf}）` : value;
 }
 
 function getMunicipalityFeatureAtPoint(map: Map, point: maplibregl.PointLike) {

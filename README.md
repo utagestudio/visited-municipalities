@@ -60,6 +60,22 @@ mise exec -- npm run prepare:data
 - N03元形状から自治体ごとの面積を算出
 - `data/stats/municipality-stats.csv` があれば人口などの統計値をマージ
 
+人口データは総務省統計局・e-Statの「令和2年国勢調査 都道府県・市区町村別の主な結果」Excelから生成できます。
+
+- Source: https://www.e-stat.go.jp/stat-search/file-download?fileKind=0&statInfId=000032143614
+- Population reference date: `2020-10-01`
+
+```bash
+mise exec -- npm run prepare:stats
+```
+
+ローカルに保存済みのExcelを使う場合は、以下のように指定します。
+
+```bash
+MUNICIPALITY_STATS_XLSX=/path/to/estat.xlsx \
+mise exec -- npm run prepare:stats
+```
+
 三角形セルの粒度は必要に応じて調整できます。
 
 ```bash
@@ -76,6 +92,7 @@ municipalityCode,population,populationAsOf,areaKm2,areaAsOf
 ```
 
 `areaKm2` は省略可能です。省略時はN03元形状から算出した面積を使います。
+e-Stat側で総人口が `-` の自治体は人口を空欄として扱い、ツールチップでは `データなし` と表示します。
 
 ## テスト
 

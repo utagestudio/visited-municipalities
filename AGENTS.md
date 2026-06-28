@@ -65,6 +65,9 @@ The expected deployment target is Cloudflare Pages.
 - Key stats by the same app-level `municipalityCode` values used by the processed map data.
 - Area may be calculated from the source N03 geometry during preprocessing.
 - Population should be merged from a developer-managed CSV such as `data/stats/municipality-stats.csv` when available.
+- Generate the population CSV from the Statistics Bureau of Japan / e-Stat "2020 Census main results by prefecture and municipality" Excel with `npm run prepare:stats`.
+- Use this e-Stat Excel source by default: https://www.e-stat.go.jp/stat-search/file-download?fileKind=0&statInfId=000032143614
+- Treat the population reference date from that source as `2020-10-01`.
 - The stats CSV should use these columns:
   - `municipalityCode`
   - `population`
@@ -72,7 +75,8 @@ The expected deployment target is Cloudflare Pages.
   - `areaKm2`
   - `areaAsOf`
 - `areaKm2` is optional in the CSV; when omitted, use the calculated source-geometry area.
-- Updating population or official area data should be a manual developer operation: refresh the CSV, rerun preprocessing, and deploy the regenerated static assets.
+- If the e-Stat source has `-` instead of a total population value, leave population empty and display it as unavailable in the tooltip.
+- Updating population or official area data should be a manual developer operation: refresh the CSV with `npm run prepare:stats`, rerun preprocessing with `npm run prepare:data`, and deploy the regenerated static assets.
 
 ## Map Rendering
 
