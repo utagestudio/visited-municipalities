@@ -21,6 +21,7 @@ The expected deployment target is Cloudflare Pages.
 - Restore saved state when the page is reopened.
 - Show basic progress information such as visited count, total municipality count, and visited percentage.
 - Provide municipality search and zoom to the matching municipality.
+- Show municipality information in a hover tooltip, including display name, population when available, and area.
 
 ## Technical Direction
 
@@ -56,6 +57,22 @@ The expected deployment target is Cloudflare Pages.
   - generated triangle-grid GeoJSON assets;
   - compressed static delivery;
   - lazy loading by prefecture or region if a nationwide single file is too large.
+
+## Municipality Stats Data
+
+- Keep municipality population and area as static generated data, not as realtime API calls from the browser.
+- Generate `public/data/municipality-stats.generated.json` during preprocessing and reference it from `public/data/manifest.json`.
+- Key stats by the same app-level `municipalityCode` values used by the processed map data.
+- Area may be calculated from the source N03 geometry during preprocessing.
+- Population should be merged from a developer-managed CSV such as `data/stats/municipality-stats.csv` when available.
+- The stats CSV should use these columns:
+  - `municipalityCode`
+  - `population`
+  - `populationAsOf`
+  - `areaKm2`
+  - `areaAsOf`
+- `areaKm2` is optional in the CSV; when omitted, use the calculated source-geometry area.
+- Updating population or official area data should be a manual developer operation: refresh the CSV, rerun preprocessing, and deploy the regenerated static assets.
 
 ## Map Rendering
 

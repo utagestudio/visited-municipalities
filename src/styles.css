@@ -69,6 +69,17 @@ button:disabled {
   line-height: 1.35;
 }
 
+.municipalityTooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.municipalityTooltipContent span {
+  color: #51606a;
+  font-weight: 600;
+}
+
 .municipalityTooltip .maplibregl-popup-tip {
   display: none;
 }

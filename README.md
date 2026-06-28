@@ -47,6 +47,7 @@ mise exec -- npm run prepare:data
 
 - `public/data/municipalities.generated.geojson`
 - `public/data/adjacency.generated.json`
+- `public/data/municipality-stats.generated.json`
 - `public/data/manifest.json`
 
 前処理では以下を行います。
@@ -56,6 +57,8 @@ mise exec -- npm run prepare:data
 - 自治体形状を一辺3000mの正三角形セルへ再構成
 - 所属未定地や所属自治体が不明な埋立地を除外
 - セル中心の近さから色回避用の近接グラフを事前生成
+- N03元形状から自治体ごとの面積を算出
+- `data/stats/municipality-stats.csv` があれば人口などの統計値をマージ
 
 三角形セルの粒度は必要に応じて調整できます。
 
@@ -65,6 +68,14 @@ TRIANGLE_COVERAGE_THRESHOLD=0.5 \
 N03_SOURCE_DATE=2023-01-01 \
 mise exec -- npm run prepare:data
 ```
+
+人口データを含める場合は、`data/stats/municipality-stats.csv.example` を参考に以下の列を持つCSVを置いてから前処理を実行します。
+
+```text
+municipalityCode,population,populationAsOf,areaKm2,areaAsOf
+```
+
+`areaKm2` は省略可能です。省略時はN03元形状から算出した面積を使います。
 
 ## テスト
 

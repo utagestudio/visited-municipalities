@@ -1,7 +1,7 @@
 import { type CSSProperties, useEffect, useRef } from 'react';
 import bbox from '@turf/bbox';
 import maplibregl, { GeoJSONSource, Map } from 'maplibre-gl';
-import type { MunicipalityCollection } from './types';
+import type { MunicipalityCollection, MunicipalityStatsMap } from './types';
 import type { SavedState } from './types';
 import {
   createBlankMapStyle,
@@ -18,6 +18,7 @@ const LONG_PRESS_MOVE_TOLERANCE_PX = 10;
 
 type MunicipalityMapProps = {
   municipalities: MunicipalityCollection;
+  stats: MunicipalityStatsMap;
   state: SavedState;
   selectedCode: string | null;
   focusCode: string | null;
@@ -28,6 +29,7 @@ type MunicipalityMapProps = {
 
 export function MunicipalityMap({
   municipalities,
+  stats,
   state,
   selectedCode,
   focusCode,
@@ -194,9 +196,10 @@ export function MunicipalityMap({
 
       const feature = getMunicipalityFeatureAtPoint(map, event.point);
       const displayName = feature?.properties?.displayName;
+      const municipalityCode = feature?.properties?.municipalityCode;
       map.getCanvas().style.cursor = typeof displayName === 'string' ? 'pointer' : '';
 
-      if (typeof displayName !== 'string') {
+      if (typeof displayName !== 'string' || typeof municipalityCode !== 'string') {
         hideHoverTooltip();
         return;
       }
@@ -210,7 +213,10 @@ export function MunicipalityMap({
           offset: 12,
         });
 
-      hoverPopupRef.current = popup.setLngLat(event.lngLat).setText(displayName).addTo(map);
+      hoverPopupRef.current = popup
+        .setLngLat(event.lngLat)
+        .setDOMContent(createTooltipContent(displayName, stats[municipalityCode]))
+        .addTo(map);
     });
     map.getCanvas().addEventListener('mouseleave', hideHoverTooltip);
 
@@ -282,6 +288,33 @@ export function MunicipalityMap({
       aria-label="市区町村マップ"
     />
   );
+}
+
+function createTooltipContent(displayName: string, stats: MunicipalityStatsMap[string] | undefined): HTMLElement {
+  const root = document.createElement('div');
+  root.className = 'municipalityTooltipContent';
+
+  const title = document.createElement('strong');
+  title.textContent = displayName;
+  root.append(title);
+
+  const population = document.createElement('span');
+  population.textContent = `人口: ${formatPopulation(stats?.population)}`;
+  root.append(population);
+
+  const area = document.createElement('span');
+  area.textContent = `面積: ${formatArea(stats?.areaKm2)}`;
+  root.append(area);
+
+  return root;
+}
+
+function formatPopulation(population: number | undefined): string {
+  return typeof population === 'number' ? `${population.toLocaleString('ja-JP')}人` : 'データなし';
+}
+
+function formatArea(areaKm2: number | undefined): string {
+  return typeof areaKm2 === 'number' ? `${areaKm2.toLocaleString('ja-JP', { maximumFractionDigits: 2 })}km²` : 'データなし';
 }
 
 function getMunicipalityFeatureAtPoint(map: Map, point: maplibregl.PointLike) {

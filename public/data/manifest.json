@@ -1,1 +1,1 @@
-{"datasetName":"generated-n03","sourceDate":"2023-01-01","geometryMode":"triangle-grid","triangleCellSizeMeters":3000,"triangleCoverageThreshold":0.5,"municipalities":"/data/municipalities.generated.geojson","adjacency":"/data/adjacency.generated.json"}
+{"datasetName":"generated-n03","sourceDate":"2023-01-01","geometryMode":"triangle-grid","triangleCellSizeMeters":3000,"triangleCoverageThreshold":0.5,"municipalities":"/data/municipalities.generated.geojson","adjacency":"/data/adjacency.generated.json","stats":"/data/municipality-stats.generated.json"}

@@ -1,22 +1,25 @@
-import type { AdjacencyMap, DataManifest, MunicipalityCollection } from './types';
+import type { AdjacencyMap, DataManifest, MunicipalityCollection, MunicipalityStatsMap } from './types';
 
 export type LoadedMapData = {
   manifest: DataManifest;
   municipalities: MunicipalityCollection;
   adjacency: AdjacencyMap;
+  stats: MunicipalityStatsMap;
 };
 
 export async function loadMapData(): Promise<LoadedMapData> {
   const manifest = await fetchJson<DataManifest>('/data/manifest.json');
-  const [municipalities, adjacency] = await Promise.all([
+  const [municipalities, adjacency, stats] = await Promise.all([
     fetchJson<MunicipalityCollection>(manifest.municipalities),
     fetchJson<AdjacencyMap>(manifest.adjacency),
+    manifest.stats ? fetchJson<MunicipalityStatsMap>(manifest.stats) : Promise.resolve({}),
   ]);
 
   return {
     manifest,
     municipalities,
     adjacency,
+    stats,
   };
 }
 
