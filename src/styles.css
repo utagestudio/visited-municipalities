@@ -612,3 +612,25 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+.aboutContent {
+  max-width: 900px;
+  margin: auto;
+  padding: 24px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.aboutContent h2 { font-size: 24px; line-height: 1.5; }
+.aboutContent h3 { margin-top: 24px; font-size: 18px; }
+.aboutDialog {
+  width: min(900px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 16px;
+  border: 1px solid #bac5cb;
+  border-radius: 12px;
+  background: #f8faf9;
+  color: #172026;
+  overflow-y: auto;
+}
+.aboutDialog::backdrop { background: rgb(23 32 38 / 45%); }
+.aboutClose { display: block; margin-left: auto; }
