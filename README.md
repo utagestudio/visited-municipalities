@@ -130,3 +130,5 @@ mise exec -- npm run build
 地図のルートは `/` で、共有URLは `/?share=…` です。`public/404.html` によりCloudflare Pagesの自動SPAフォールバックを無効にし、存在しないパスは404にします。全パスをindex.htmlに書き換える `_redirects` は配置しません。
 
 デプロイ後は `/` と共有URLが200、存在しないパスが404になること、robots.txt・sitemap.xml・地図データ・アセットが取得できることを確認してください。ViteのpreviewサーバーはCloudflareの404配信の検証には使えません。Search ConsoleのURL検査では本文と必要なリソースの取得状態を確認します。
+
+起動時はhead内の小さな同期スクリプトと最小CSSで読み込み画面を先に表示します。初期HTMLとReact起動直後の読み込み画面は同じ構成にし、説明本文が一瞬表示されるのを防ぎます。JavaScriptを無効にした場合は読み込み画面を表示せず、説明本文を通常表示します。

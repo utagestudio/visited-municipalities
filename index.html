@@ -3,6 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body { margin: 0; }
+      .startupShell { display: none; grid-template-columns: minmax(0, 1fr) 360px; min-height: 100vh; font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #172026; }
+      html[data-startup] .startupShell { display: grid; }
+      html[data-about-modal] body > #about { display: none; }
+      .startupMap { display: grid; place-items: center; min-height: 100vh; background: #eef2f3; }
+      .startupPanel { box-sizing: border-box; padding: 24px; border-left: 1px solid #c8d0d5; background: #f8faf9; }
+      .startupPanel h1 { margin: 0; font-size: 24px; line-height: 1.2; }
+      .startupPanel > p:not(.startupEyebrow) { line-height: 1.8; }
+      .startupEyebrow { margin: 0 0 8px; font-size: 12px; color: #66757f; }
+      .startupPanel a { color: #277183; }
+      @media (max-width: 820px) {
+        .startupShell { grid-template-columns: 1fr; }
+        .startupMap { min-height: 58vh; height: 58vh; }
+        .startupPanel { border-left: 0; border-top: 1px solid #c8d0d5; }
+      }
+    </style>
+    <script>
+      document.documentElement.setAttribute('data-startup', '');
+      if (typeof HTMLDialogElement !== 'undefined' && typeof HTMLDialogElement.prototype.showModal === 'function') {
+        document.documentElement.setAttribute('data-about-modal', '');
+      }
+    </script>
     <meta name="description" content="訪問した日本の市区町村を地図上で記録・色分けできるWebツールです。全国の市区町村をクリックして訪問済みとして保存し、共有URLやJSONで記録を共有できます。" />
     <meta name="application-name" content="訪問済み市区町村マップ" />
     <meta name="theme-color" content="#277183" />
@@ -45,7 +68,17 @@
     <title>訪問済み市区町村マップ | 日本の市区町村訪問記録</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main class="startupShell" aria-busy="true">
+        <section class="startupMap" aria-label="地図を準備中"><p role="status">地図を読み込み中</p></section>
+        <aside class="startupPanel" aria-label="操作パネルを準備中">
+          <p class="startupEyebrow">Visited municipalities</p>
+          <h1>訪問済み市区町村マップ</h1>
+          <p>訪問した日本全国の市区町村を色分けして記録できる無料のWebツールです。</p>
+          <a href="#about">このツールについて・使い方</a>
+        </aside>
+      </main>
+    </div>
     <section id="about" class="aboutContent" aria-labelledby="about-title">
       <h2 id="about-title">訪問した市区町村を塗りつぶして、旅の記録を残そう</h2>
       <p>訪問済み市区町村マップは、行ったことのある日本全国の市区町村を地図上で記録できる無料のWebツールです。旅行や出張で訪れた場所を色分けして、自分だけの訪問記録を作れます。アカウント登録は不要です。</p>

@@ -1,6 +1,7 @@
 import { type ChangeEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MunicipalityMap } from './MunicipalityMap';
+import { LoadingScreen } from './LoadingScreen';
 import { pickColorForMunicipality } from './colors';
 import { loadMapData, type LoadedMapData } from './data';
 import { createShareUrl, isShareUrl, readSharedStateFromUrl } from './share';
@@ -320,16 +321,7 @@ export function App() {
   }
 
   if (!mapData) {
-    return (
-      <main className="appShell">
-        <section className="emptyState">
-          <h1>訪問済み市区町村マップ</h1>
-          <p>訪問した日本全国の市区町村を色分けして記録できる無料のWebツールです。</p>
-          <p role="status">地図を読み込み中</p>
-          <a href="#about">このツールについて・使い方</a>
-        </section>
-      </main>
-    );
+    return <LoadingScreen />;
   }
 
   return (
