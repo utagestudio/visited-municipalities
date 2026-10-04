@@ -313,7 +313,7 @@ export function App() {
           <h1>地図データを読み込めませんでした</h1>
           <p>{error}</p>
           <p>訪問した日本全国の市区町村を色分けして記録できる無料のWebツールです。</p>
-          <a href="/about.html">このツールについて・使い方</a>
+          <a href="#about">このツールについて・使い方</a>
         </section>
       </main>
     );
@@ -326,7 +326,7 @@ export function App() {
           <h1>訪問済み市区町村マップ</h1>
           <p>訪問した日本全国の市区町村を色分けして記録できる無料のWebツールです。</p>
           <p role="status">地図を読み込み中</p>
-          <a href="/about.html">このツールについて・使い方</a>
+          <a href="#about">このツールについて・使い方</a>
         </section>
       </main>
     );
@@ -476,7 +476,7 @@ export function App() {
         </section>
 
         <footer className="panelFooter">
-          <a href="/about.html" target="_blank" rel="noreferrer">このツールについて</a>
+          <a href="#about">このツールについて</a>
           <ContactLinks />
           <span>
             制作者:{' '}

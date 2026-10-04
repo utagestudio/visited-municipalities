@@ -123,10 +123,10 @@ mise exec -- npm run build
 
 ## SEOと静的配信
 
-ツール本体の1画面構成を維持し、詳しい説明は静的な `/about` ページに置きます。操作パネルの「このツールについて」から別タブで開けます。リンクには `/about.html` を指定し、Vite開発サーバーでも静的ファイルを直接取得します。Cloudflare Pagesでは拡張子なしの `/about` へ正規化されます。初期HTMLにも短い概要と説明ページへのリンクを含め、React起動後は置き換えます。地図データの読み込み中・失敗時にも概要を表示します。
+サービス概要と使い方は `index.html` のReact管理範囲外に静的HTMLとして置きます。JavaScript無効時は通常の本文として読めます。有効時は同じDOMをネイティブdialogに移し、操作パネルの「このツールについて」からモーダルとして開きます。本文は再生成せず、地図の1画面構成を維持します。Escまたは閉じるボタンで閉じ、フォーカスを元のリンクに戻します。
 
 `/data/` は描画に必要なためクロールを許可し、データ単体の検索掲載は `_headers` の `X-Robots-Tag: noindex` で抑制します。
 
-地図のルートは `/`、静的な説明ページは `/about` で、共有URLは `/?share=…` です。`public/404.html` によりCloudflare Pagesの自動SPAフォールバックを無効にし、存在しないパスは404にします。全パスをindex.htmlに書き換える `_redirects` は配置しません。
+地図のルートは `/` で、共有URLは `/?share=…` です。`public/404.html` によりCloudflare Pagesの自動SPAフォールバックを無効にし、存在しないパスは404にします。全パスをindex.htmlに書き換える `_redirects` は配置しません。
 
 デプロイ後は `/` と共有URLが200、存在しないパスが404になること、robots.txt・sitemap.xml・地図データ・アセットが取得できることを確認してください。ViteのpreviewサーバーはCloudflareの404配信の検証には使えません。Search ConsoleのURL検査では本文と必要なリソースの取得状態を確認します。

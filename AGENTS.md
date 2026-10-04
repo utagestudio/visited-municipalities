@@ -136,7 +136,7 @@ When restoring state:
 
 - Build command: `npm run build`.
 - Output directory: `dist`.
-- The interactive app uses the root route; shared maps use the `share` query parameter. A static usage page is served at `/about`.
+- The interactive app uses the root route; shared maps use the `share` query parameter. Static usage content lives outside the React root and is opened as a modal when JavaScript is enabled.
 - Include a top-level `404.html` and do not configure a catch-all SPA fallback. Unknown paths must return HTTP 404.
 - The first release does not require Cloudflare Workers, D1, KV, accounts, login, or cloud sync.
 - Only preprocessed static assets should be deployed.
