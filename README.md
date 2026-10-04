@@ -94,6 +94,21 @@ municipalityCode,population,populationAsOf,areaKm2,areaAsOf
 `areaKm2` は省略可能です。省略時はN03元形状から算出した面積を使います。
 e-Stat側で総人口が `-` の自治体は人口を空欄として扱い、ツールチップでは `データなし` と表示します。
 
+## Google Tag ManagerとCookie同意
+
+Cloudflare Pagesの対象プロジェクトの **Settings → Variables and Secrets** で、
+環境変数 `GTM_ID` にコンテナID（例: `GTM-XXXXXXX`）を設定してください。
+Production / Previewの必要な環境に設定します。`VITE_` 接頭辞は不要です。
+`GTM_ID` のみを明示的にフロントエンドへ渡します。
+値はビルド時に埋め込まれるため、設定・変更後は再ビルド／再デプロイが必要です。
+
+未設定または空の場合は同意画面もGTMも表示・読み込みしません。
+設定済みの場合はCookie同意画面を表示し、承認後のみGTMを読み込みます。
+承認・拒否は `localStorage` の `visitedMunicipalityMap:cookieConsent:v1` に保存し、
+再訪時も反映します。選択をやり直す場合はこのキーを削除して再読み込みしてください。
+ブラウザで保存が利用できない場合は、現在のページでのみ選択を反映します。
+同意前・拒否時にはGTMのscriptやiframeを挿入しません。
+
 ## テスト
 
 ```bash
