@@ -612,15 +612,3 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
-
-.siteAbout {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 40px 24px 80px;
-  line-height: 1.8;
-  overflow-wrap: anywhere;
-}
-
-.siteAbout h2 { font-size: 24px; line-height: 1.5; }
-.siteAbout h3 { margin-top: 28px; font-size: 18px; }
-.siteAbout p { margin: 12px 0; }
