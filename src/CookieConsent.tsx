@@ -26,9 +26,11 @@ function loadGtm(gtmId: string) {
   document.head.appendChild(script);
 }
 
-export function CookieConsent({ gtmId }: { gtmId: string }) {
+export function CookieConsent({ gtmId, reload = () => window.location.reload() }: { gtmId: string; reload?: () => void }) {
   const containerId = gtmId.trim();
   const [consent, setConsent] = useState(loadConsent);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (containerId && consent === 'accepted') loadGtm(containerId);
@@ -38,12 +40,23 @@ export function CookieConsent({ gtmId }: { gtmId: string }) {
     try {
       window.localStorage.setItem(COOKIE_CONSENT_KEY, choice);
     } catch {
+      if (consent === 'accepted' && choice === 'rejected') {
+        setError('設定を保存できませんでした。ブラウザのストレージ設定を確認して、もう一度お試しください。');
+        return;
+      }
       // Still honor the choice for this visit when storage is unavailable.
     }
     setConsent(choice);
+    setSettingsOpen(false);
+    setError(null);
+    // Removing a script cannot stop tags that it has already executed.
+    if (consent === 'accepted' && choice === 'rejected') reload();
   }
 
-  if (!containerId || consent !== null) return null;
+  if (!containerId) return null;
+  if (consent !== null && !settingsOpen) {
+    return <button className="cookieSettingsButton" type="button" onClick={() => setSettingsOpen(true)}>Cookie設定</button>;
+  }
 
   return (
     <section className="cookieConsent" role="dialog" aria-labelledby="cookie-consent-title" aria-describedby="cookie-consent-description">
@@ -52,7 +65,11 @@ export function CookieConsent({ gtmId }: { gtmId: string }) {
         利用状況の分析のため、Google Tag Managerを通じてCookieを利用します。
         承認した場合のみ読み込みます。拒否しても地図の機能はすべて利用できます。
       </p>
+      {consent !== null && <p>現在の設定: {consent === 'accepted' ? '承認済み' : '拒否済み'}</p>}
+      {consent === 'accepted' && <p>拒否に変更すると、設定を反映するためページを再読み込みします。</p>}
+      {error && <p role="alert">{error}</p>}
       <div className="cookieConsentActions">
+        {consent !== null && <button type="button" onClick={() => { setSettingsOpen(false); setError(null); }}>閉じる</button>}
         <button type="button" onClick={() => chooseConsent('rejected')}>拒否する</button>
         <button type="button" onClick={() => chooseConsent('accepted')}>承認する</button>
       </div>
