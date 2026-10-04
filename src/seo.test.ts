@@ -7,7 +7,7 @@ describe('static SEO content and delivery', () => {
   it('includes an initial overview without content below the tool', () => {
     const document = new DOMParser().parseFromString(read('index.html'), 'text/html');
     expect(document.querySelector('#root')?.textContent).toContain('市区町村を色分け');
-    expect(document.querySelector('#root a')?.getAttribute('href')).toBe('/about');
+    expect(document.querySelector('#root a')?.getAttribute('href')).toBe('/about.html');
     expect(document.querySelectorAll('body > section, body > main')).toHaveLength(0);
   });
 
