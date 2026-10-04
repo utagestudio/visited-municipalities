@@ -100,3 +100,7 @@ e-Stat側で総人口が `-` の自治体は人口を空欄として扱い、ツ
 mise exec -- npm test
 mise exec -- npm run build
 ```
+
+## お問い合わせ
+
+[機能要望・不具合報告](https://tally.so/r/kdVdDR?product=%E8%A8%AA%E5%95%8F%E6%B8%88%E3%81%BF%E5%B8%82%E5%8C%BA%E7%94%BA%E6%9D%91%E3%83%9E%E3%83%83%E3%83%97) / [GitHub Issues](https://github.com/utagestudio/visited-municipalities/issues)

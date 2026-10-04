@@ -417,6 +417,19 @@ button:disabled {
   font-size: 12px;
 }
 
+.contactLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.6;
+}
+
+.helpFooter {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #d7dee2;
+}
+
 .panelFooter a {
   color: #277183;
   font-weight: 700;

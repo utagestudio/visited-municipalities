@@ -15,6 +15,9 @@ import {
 } from './storage';
 import type { MunicipalityFeature, SavedState } from './types';
 
+const CONTACT_FORM_URL = 'https://tally.so/r/kdVdDR?product=%E8%A8%AA%E5%95%8F%E6%B8%88%E3%81%BF%E5%B8%82%E5%8C%BA%E7%94%BA%E6%9D%91%E3%83%9E%E3%83%83%E3%83%97';
+const ISSUES_URL = 'https://github.com/utagestudio/visited-municipalities/issues';
+
 const HELP_SEEN_KEY = 'visitedMunicipalityMap:helpSeen';
 
 export function App() {
@@ -468,6 +471,7 @@ export function App() {
         </section>
 
         <footer className="panelFooter">
+          <ContactLinks />
           <span>
             制作者:{' '}
             <a href="https://utage.games" target="_blank" rel="noreferrer">
@@ -481,6 +485,19 @@ export function App() {
 
       {isHelpOpen && <HelpModal isReadOnlyShare={isReadOnlyShare} onClose={closeHelp} />}
     </main>
+  );
+}
+
+function ContactLinks() {
+  return (
+    <div className="contactLinks">
+      <a href={CONTACT_FORM_URL} target="_blank" rel="noreferrer">
+        機能要望・不具合報告
+      </a>
+      <a href={ISSUES_URL} target="_blank" rel="noreferrer">
+        GitHub Issues
+      </a>
+    </div>
   );
 }
 
@@ -737,6 +754,9 @@ function HelpModal({ isReadOnlyShare, onClose }: { isReadOnlyShare: boolean; onC
             text="通常表示ではブラウザに自動保存されます。JSONのエクスポート・インポートも使えます。"
           />
         </div>
+        <footer className="panelFooter helpFooter">
+          <ContactLinks />
+        </footer>
       </section>
     </div>
   );
