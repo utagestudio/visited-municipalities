@@ -17,7 +17,7 @@
   position: fixed;
   z-index: 1000;
   bottom: 16px;
-  left: 16px;
+  right: 16px;
   width: min(480px, calc(100% - 32px));
   padding: 20px;
   border: 1px solid #bac5cb;
@@ -37,6 +37,19 @@
   color: #277183;
 }
 .cookieConsentActions button:last-child { background: #277183; color: #fff; }
+
+.cookieSettingsButton {
+  position: fixed;
+  z-index: 1000;
+  bottom: 16px;
+  right: 16px;
+  padding: 8px 12px;
+  border: 1px solid #bac5cb;
+  border-radius: 6px;
+  background: #fff;
+  color: #277183;
+  box-shadow: 0 2px 8px rgb(23 32 38 / 12%);
+}
 
 body {
   margin: 0;
