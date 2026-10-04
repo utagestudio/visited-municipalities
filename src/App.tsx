@@ -471,6 +471,7 @@ export function App() {
         </section>
 
         <footer className="panelFooter">
+          <a href="#about">このツールについて</a>
           <ContactLinks />
           <span>
             制作者:{' '}
