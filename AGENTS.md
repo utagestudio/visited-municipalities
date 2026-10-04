@@ -136,12 +136,8 @@ When restoring state:
 
 - Build command: `npm run build`.
 - Output directory: `dist`.
-- Configure SPA fallback with a `_redirects` file:
-
-```text
-/* /index.html 200
-```
-
+- The app uses only the root route; shared maps use the `share` query parameter.
+- Include a top-level `404.html` and do not configure a catch-all SPA fallback. Unknown paths must return HTTP 404.
 - The first release does not require Cloudflare Workers, D1, KV, accounts, login, or cloud sync.
 - Only preprocessed static assets should be deployed.
 - Keep source GIS downloads and intermediate conversion artifacts out of the production bundle.
@@ -159,7 +155,7 @@ Implement tests for:
 - The precomputed proximity graph is used for color selection instead of runtime polygon intersection.
 - Search zooms to the selected municipality.
 - Empty, malformed, or unsupported `localStorage` state does not break the app.
-- Static SPA routing works under Cloudflare Pages style fallback.
+- Root and shared-map URLs work under Cloudflare Pages static routing; unknown paths return HTTP 404.
 
 ## Initial Scope
 
