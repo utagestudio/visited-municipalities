@@ -4,10 +4,15 @@
 
 ## 開発
 
+Node.js 26.12.1 を使用します（[2026年10月21日のセキュリティ修正版](https://nodejs.org/en/blog/release/v26.12.1)）。
+`.node-version` は Cloudflare Pages 用、`mise.toml` はローカルの mise 用のバージョン指定です。
 この環境では Node.js は mise 経由で利用します。
 
 ```bash
-mise exec -- npm install
+mise trust
+mise install
+mise exec -- node --version # v26.12.1
+mise exec -- npm ci
 mise exec -- npm run dev
 ```
 
@@ -20,6 +25,17 @@ mise exec -- npm run build
 - Build command: `npm run build`
 - Output directory: `dist`
 - 存在しないパスの404ページ: `public/404.html`
+
+Cloudflare Pages の Production / Preview で `NODE_VERSION` が設定されている場合は、
+`.node-version` と同じ `26.12.1` に揃えるか、環境変数の指定を削除してください。
+デプロイ時のビルドログでも使用バージョンを確認します。
+
+Node.js を更新するときは、公式の26系リリース情報を確認し、`.node-version` と
+`mise.toml` を同じ修正版に更新します。最低対応版を引き上げる場合は
+`package.json` と `package-lock.json` のルートパッケージの `engines.node` も揃えます。
+その後 `mise install`、`npm ci`、テスト、lint、ビルド、データ前処理を確認してください
+（npm コマンドは `mise exec --` 経由で実行します）。
+`npm update` や `@types/node` の更新だけでは Node.js 本体の修正は適用されません。
 
 ## データ
 
